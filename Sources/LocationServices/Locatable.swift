@@ -8,7 +8,7 @@
 import CoreLocation
 import MapKit
 
-public protocol Locatable:Hashable {
+public protocol Locatable:Hashable, CustomStringConvertible {
     var latitude:Double {get}
     var longitude:Double {get}
 }

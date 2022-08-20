@@ -6,7 +6,7 @@ public struct LocationServices {
     public init() {
     }
     
-    static var defaultLocation:CLLocation {
+    public static var defaultLocation:CLLocation {
         LocationStore.locations[0].location
     }
     

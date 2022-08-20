@@ -10,22 +10,34 @@ import CoreLocation
 import MapKit
 
 
-//public extension LocationServices {
-//    enum ConversionTypes {
-//        case cllocation
-//        case mkitem
-//        case placemark
-//        case string
-//    }
-//}
+public extension Locatable {
+    func asMapItem() -> MKMapItem {
+        MKMapItem(placemark: MKPlacemark(coordinate: self.location.coordinate))
+    }
+}
 
-
-//public extension CLLocation {
-//    func asPlacemark() async throws -> CLPlacemark {
-//        try await self.placemark
-//    }
-//
-//    func asMKMapItem() async throws -> MKMapItem {
-//
-//    }
-//}
+public extension LSLocation {
+    init?(from placemark:CLPlacemark) {
+        if let location = placemark.location {
+            self.latitude = location.coordinate.latitude
+            self.longitude = location.coordinate.longitude
+        } else {
+            return nil
+        }
+        
+        self.description = LocationServices.descriptionFromPlacemark(placemark)
+    }
+    
+    init(coordinates:CLLocation, name:String) {
+        self.latitude = coordinates.latitude
+        self.longitude = coordinates.longitude
+        self.description = name
+    }
+    
+    //relies of locatable extension
+    init(from mkmapitem:MKMapItem) {
+        self.latitude = mkmapitem.latitude
+        self.longitude = mkmapitem.longitude
+        self.description = LocationServices.descriptionFromMapItem(mkmapitem)
+    }
+}

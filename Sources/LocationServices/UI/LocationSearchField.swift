@@ -141,17 +141,20 @@ public struct LocationSearchField: View {
 
                     }, label: {
                         SuggestionItemRow(item: item)
-                    })
+                    }).padding()
                     Divider()
                 }
 
-            }
+        }.border(StyleConstants.textFieldBackground)
     }
     
     
     enum StyleConstants {
         static let inset = 5.0
-        static let menuBackgroundOpacity = 0.5
+        static let menuBackgroundOpacity = 0.2
+        static let textFieldBackground = Color(UIColor.systemGray6)
+        // are Color(UIColor.systemGray6) and Color(UIColor.tertiarySystemFill) the same?
+        // what is the default Divder() color?
     }
     
     struct DropDownBackgroundModifier: ViewModifier {
@@ -159,7 +162,7 @@ public struct LocationSearchField: View {
         func body(content: Content) -> some View {
             content
                 .background(Rectangle()
-                    .fill(Color(UIColor.systemGray6))
+                    .fill(StyleConstants.textFieldBackground)
                     .opacity(StyleConstants.menuBackgroundOpacity)
                     //.foregroundStyle(.ultraThinMaterial)
                 )
@@ -174,7 +177,7 @@ public struct LocationSearchField: View {
         func _body(configuration: TextField<_Label>) -> some View {
             configuration
                 .padding(StyleConstants.inset)
-                .background(RoundedRectangle(cornerRadius: StyleConstants.inset).fill(Color(UIColor.systemGray6)))
+                .background(RoundedRectangle(cornerRadius: StyleConstants.inset).fill(StyleConstants.textFieldBackground))
         }
     }
 }
