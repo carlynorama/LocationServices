@@ -10,32 +10,35 @@ import MapKit
 
 
 struct LocationListSearchableSheet: View {
+    //SAME AS CHOOSER SHEET
     @EnvironmentObject var searchService:LocationSearchService
+    @Environment(\.presentationMode) var presentationMode
+    
+    @State var selectedLocation:MKMapItem
+    @Binding var location:MKMapItem
+    //END SAME
+    
+    //Does not care about style. 
+    init(location locbind:Binding<MKMapItem>) {
+        self._location = locbind
+        self._selectedLocation = State(initialValue: locbind.wrappedValue)
+    }
+
+    
+
     @State private var searchText = ""
     @Environment(\.dismissSearch) var dismissSearch
     @Environment(\.isSearching) var isSearching
-    @Environment(\.presentationMode) var presentationMode
-    
-    //@State var selectedLocation:MKMapItem
-    @Binding var location:MKMapItem
+
 
 
     var body: some View {
         NavigationView {
-            VStack {
                 VStack {
+                    ChooserButton(item: selectedLocation, action: updateLocation)
                     List(searchService.resultItems, id:\.self) { item in
-                        HStack {
-                            //                    Image(systemName: "globe").resizable()
-                            //                        .aspectRatio(contentMode: .fit)
-                            Button(action: {
-                                updateSelected(item: item)
-                                //updateLocation()
-                            },
-                                   label: { MapItemRow(item: item) }
-                            ).buttonStyle(.bordered)
-                                .layoutPriority(3)
-                        }
+                        
+                        ResultsRow(item: item, action: { _ in updateSelected(item: item)})
                     }.listStyle(.plain)
                         .searchable(text: $searchText) {
                             if searchService.recentSearches.count > 0 {
@@ -44,8 +47,7 @@ struct LocationListSearchableSheet: View {
                                 }
                             }
                             ForEach(searchService.suggestedItems) { suggestion in
-                                let displayName = suggestion.title
-                                Text(displayName)
+                                SuggestionRow(item: suggestion)
                                     .searchCompletion(suggestion.title + " " + suggestion.subtitle)
                             }
                         }.onChange(of: searchText) { newQuery in
@@ -61,10 +63,31 @@ struct LocationListSearchableSheet: View {
                 }
             }
         }
+    
+    
+    //SAME AS CHOOSER SHEET
+    func fullUpdateAndClose(item:MKMapItem) {
+        updateSelected(item: item)
+        updateLocation()
     }
+    
     func updateSelected(item:MKMapItem) {
-        location = item
+        selectedLocation = item
+        //if searchService.resultItems.count == 1 {
+            updateLocation()
+        //}
     }
+    
+    func updateLocation() {
+        location = selectedLocation
+        searchService.clearSuggestions()
+        close()
+    }
+    
+    func close() {
+        presentationMode.wrappedValue.dismiss()
+    }
+    //END SAME
 }
 
 //struct LocationListSearchableView_Previews: PreviewProvider {

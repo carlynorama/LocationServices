@@ -36,15 +36,7 @@ struct LocationPickerChooserContent:View {
             HStack(alignment: .firstTextBaseline) {
                 Text("Location:")
                 Spacer()
-                Button(action: { updateLocation() }, label: {
-                    VStack(alignment: .leading) {
-                        Text(selectedLocation.name ?? "No name provided")
-                        HStack {
-                            Text("\(selectedLocation.placemark.coordinate.latitude)" )
-                            Text("\(selectedLocation.placemark.coordinate.longitude)" )
-                        }
-                    }
-                }).buttonStyle(.borderedProminent)
+                ChooserButton(item: selectedLocation, action: updateLocation)
             }
             switch style {
             case .popoverSearchWithSuggestions(let suggestions):
@@ -58,21 +50,16 @@ struct LocationPickerChooserContent:View {
             }.zIndex(10)
             //List(1..<5) { _ in
             List(searchService.resultItems, id:\.self) { item in
-                HStack {
-//                    Image(systemName: "globe").resizable()
-//                        .aspectRatio(contentMode: .fit)
-                    Button(action: {
-                        updateSelected(item: item)
-                        updateLocation()
-                    },
-                           label: { MapItemRow(item: item) }
-                    ).buttonStyle(.bordered)
-                        .layoutPriority(3)
-                }
+                ResultsRow(item: item, action: { _ in fullUpdateAndClose(item: item) })
             }.listStyle(.plain)
         }.environmentObject(searchService)
             .padding(15)
 
+    }
+    
+    func fullUpdateAndClose(item:MKMapItem) {
+        updateSelected(item: item)
+        updateLocation()
     }
     
     func updateSelected(item:MKMapItem) {

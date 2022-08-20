@@ -10,17 +10,6 @@ import MapKit
 import CoreLocationUI
 
 
-//struct MapItemRow: View {
-//    let item:MKMapItem
-//
-//    var body: some View {
-//        VStack {
-//            Text("\(item.name ?? "No name")")
-//            Text("placemark: \(item.placemark)").font(.caption)
-//        }
-//    }
-//}
-
 public struct MapItemRow:View {
     public init(item:MKMapItem) {
         self.item = item
@@ -40,37 +29,62 @@ public struct MapItemRow:View {
             }
         }
     }
-        
-        func descriptionFromPlacemark(_ placemark:CLPlacemark) -> String {
-            let firstItem = placemark.locality //placemark.areasOfInterest?[0] ?? placemark.locality
-            let availableInfo:[String?] = [firstItem, placemark.administrativeArea, placemark.country]
-            let string = availableInfo.compactMap{ $0 }.joined(separator: ", ")
-            return string
-        }
+    
+    func descriptionFromPlacemark(_ placemark:CLPlacemark) -> String {
+        let firstItem = placemark.locality //placemark.areasOfInterest?[0] ?? placemark.locality
+        let availableInfo:[String?] = [firstItem, placemark.administrativeArea, placemark.country]
+        let string = availableInfo.compactMap{ $0 }.joined(separator: ", ")
+        return string
+    }
 }
 
-
-
-public struct CompletionItemRow: View {
-    @EnvironmentObject var infoService:LocationSearchService
-    let item:MKLocalSearchCompletion
+struct ResultsRow:View {
+    var item:MKMapItem
+    var action:(MKMapItem)->()
     
-//        Has no effect on layout issues
-//        let charset = CharacterSet.alphanumerics.inverted
-//            .trimmingCharacters(in: charset)
-    
-    public var body: some View {
+    var body: some View {
         HStack {
-            VStack {
-                Text("\(item.title)")
-                Text("\(item.subtitle)").font(.caption)
-            }
-            Button("") {
-                infoService.runSuggestedItemSearch(for: item)
-            }
+            //                    Image(systemName: "globe").resizable()
+            //                        .aspectRatio(contentMode: .fit)
+            Button(action: { action(item) },
+                   label: { MapItemRow(item: item) }
+            ).buttonStyle(.bordered)
+                .layoutPriority(3)
         }
     }
 }
+
+struct SuggestionRow: View {
+    let item:MKLocalSearchCompletion
+    public var body: some View {
+        VStack(alignment: .leading) {
+                Text("\(item.title)")
+                Text("\(item.subtitle)").font(.caption)
+            }
+    }
+}
+
+
+//public struct CompletionItemRow: View {
+//    @EnvironmentObject var infoService:LocationSearchService
+//    let item:MKLocalSearchCompletion
+//    
+//    //        Has no effect on layout issues
+//    //        let charset = CharacterSet.alphanumerics.inverted
+//    //            .trimmingCharacters(in: charset)
+//    
+//    public var body: some View {
+//        HStack {
+//            VStack(alignment: .leading) {
+//                Text("\(item.title)")
+//                Text("\(item.subtitle)").font(.caption)
+//            }
+//            Button("") {
+//                infoService.runSuggestedItemSearch(for: item)
+//            }
+//        }
+//    }
+//}
 
 struct LocationPickerLabelLayout:View {
     @Binding var item:MKMapItem
@@ -79,23 +93,19 @@ struct LocationPickerLabelLayout:View {
         
         HStack {
             Image(systemName: "globe")
-                .imageScale(.large)
-            //                            .resizable()
-            //                            .aspectRatio(contentMode: .fit)
+                //.imageScale(.large)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
             VStack(alignment: .leading) {
                 Text(item.name ?? "No name provided")
                 Text(descriptionFromPlacemark(item.placemark))
-//                HStack {
-//                    Text("\(item.placemark.coordinate.latitude)" )
-//                    Text("\(item.placemark.coordinate.longitude)" )
-//                }
             }.layoutPriority(1)
         }.padding(5)
-
+        
     }
     
     func descriptionFromPlacemark(_ placemark:CLPlacemark) -> String {
-        print("LPLabelLayout descForPlacm()\(String(describing: placemark))")
+        //print("LPLabelLayout descForPlacm()\(String(describing: placemark))")
         let firstItem = placemark.locality //placemark.areasOfInterest?[0] ?? placemark.locality
         let availableInfo:[String?] = [firstItem, placemark.administrativeArea, placemark.country]
         var string = availableInfo.compactMap{ $0 }.joined(separator: ", ")
@@ -106,6 +116,21 @@ struct LocationPickerLabelLayout:View {
     }
 }
 
+struct ChooserButton:View {
+    var item:MKMapItem
+    var action:()->()
+    var body: some View {
+        Button(action: { action() }, label: {
+            VStack(alignment: .leading) {
+                Text(item.name ?? "No name provided")
+                HStack {
+                    Text("\(item.placemark.coordinate.latitude)" )
+                    Text("\(item.placemark.coordinate.longitude)" )
+                }
+            }
+        }).buttonStyle(.borderedProminent)
+    }
+}
 
 
 struct CurrentLocationButton2: View {
@@ -114,11 +139,11 @@ struct CurrentLocationButton2: View {
     
     var body: some View {
         LocationButton(.currentLocation) {
-                mapItem = MKMapItem.forCurrentLocation()
-            }.symbolVariant(.fill)
-                .labelStyle(.iconOnly)
-                .foregroundColor(Color.white)
-                .cornerRadius(20)
+            mapItem = MKMapItem.forCurrentLocation()
+        }.symbolVariant(.fill)
+            .labelStyle(.iconOnly)
+            .foregroundColor(Color.white)
+            .cornerRadius(20)
         
     }
 }
@@ -130,12 +155,12 @@ struct CurrentLocationButton: View {
     @Binding var location:CLLocation?
     
     var body: some View {
-            LocationButton(.currentLocation) {
-                location = locationRequester()
-            }.symbolVariant(.fill)
-                .labelStyle(.iconOnly)
-                .foregroundColor(Color.white)
-                .cornerRadius(20)
+        LocationButton(.currentLocation) {
+            location = locationRequester()
+        }.symbolVariant(.fill)
+            .labelStyle(.iconOnly)
+            .foregroundColor(Color.white)
+            .cornerRadius(20)
         
     }
 }
