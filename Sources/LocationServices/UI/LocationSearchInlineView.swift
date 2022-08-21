@@ -11,8 +11,16 @@ import MapKit
 
 
 public struct LocationSearchInlineView: View {
-    public init(resultCount:Int = 8) {
+    
+    @State var selectedItem:MKMapItem
+    @Binding var mapitem:MKMapItem
+    
+    //Does not care about style.
+    init(mapitem locbind:Binding<MKMapItem>, resultCount:Int = 8, reservingSpace:Bool = false) {
+        self._mapitem = locbind
+        self._selectedItem = State(initialValue: locbind.wrappedValue)
         self.numberOfItems = resultCount
+        self.reservingSpace = reservingSpace
     }
     
     @EnvironmentObject var searchService:LocationSearchService
@@ -25,58 +33,103 @@ public struct LocationSearchInlineView: View {
     @State var shouldSuggest = true
     @State var showSuggestions = false
     
-    @FocusState private var searchIsFocused: Bool
+    @State var searching = false
     
+    @FocusState private var searchIsFocused: Bool
     
     
     //TODO: Layout
     //Custom alignment guide that can swap it from a drop down to a pop up
     let numberOfItems:Int  //based on space? preference in init?
+    let reservingSpace:Bool
     
     public var body: some View {
-            VStack(alignment: .leading) {
-                HStack {
-                    Image(systemName: "location.magnifyingglass").foregroundColor(.secondary)
-                    TextField(promptText, text: $textObserver.searchText)
-                        .textFieldStyle(LocationSearchTextFieldStyle())
-                        .focused($searchIsFocused)
-                        .onReceive(textObserver.$debouncedText) { (val) in
-                            searchTextField = val
+        VStack(alignment: .leading) {
+            HStack {
+                Image(systemName: "location.magnifyingglass").foregroundColor(.secondary)
+                TextField(promptText, text: $textObserver.searchText)
+                    .textFieldStyle(LocationSearchTextFieldStyle())
+                    .focused($searchIsFocused)
+                    .onReceive(textObserver.$debouncedText) { (val) in
+                        searchTextField = val
+                    }
+                    .onSubmit() {
+                        searching = true
+                        searchService.runKeywordSearch(for: searchTextField)
+                        searchService.addToRecentSearches(searchTextField)
+                        searchService.clearSuggestions()
+                    }
+                    .onChange(of: $searchTextField.wrappedValue) { text in
+                        searching = true
+                        if shouldSuggest == true {
+                            searchService.fetchSuggestions(with: searchTextField)
                         }
-                        .onChange(of: $searchTextField.wrappedValue) { text in
-                            if shouldSuggest == true {
-                                searchService.fetchSuggestions(with: searchTextField)
+                        shouldSuggest = true
+                        
+                        if searchTextField.isEmpty {
+                            withAnimation {
+                                showSuggestions = false
                             }
-                            shouldSuggest = true
-                            
-                            if searchTextField.isEmpty {
-                                withAnimation {
-                                    showSuggestions = false
-                                }
-                                searchService.clearSuggestions()
-                                
-                            }
+                            searchService.clearSuggestions()
                         }
-                }//.layoutPriority(3)
-                if showSuggestions {
-                    ZStack {
-                        suggestionsList.modifier(DropDownBackgroundModifier())
-                    }.transition(resultReveal)
-                }
-                Spacer()
+                    }
             }
-            .onChange(of: searchService.suggestedItems.count) { newValue in
-                if newValue > 0 {
-                    withAnimation {
-                        showSuggestions = true
-                    }
-                } else {
-                    withAnimation {
-                        showSuggestions = false
-                    }
+            if !reservingSpace {
+                if searching {
+                    searchContent
+                        .frame(minHeight: 200, maxHeight: 400)
+                        .transition(resultReveal)
                 }
-            }.alignmentGuide(.top) { $0[VerticalAlignment.top] }
+            } else {
+                ZStack {
+                    searchContent
+                }.frame(minHeight: 200, maxHeight: 400)
+            }
+            
+        }
+        .onChange(of: searchService.suggestedItems.count) { newValue in
+            if newValue > 0 {
+                withAnimation {
+                    showSuggestions = true
+                }
+            } else {
+                withAnimation {
+                    showSuggestions = false
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder private var suggestionsList: some View {
+        VStack(alignment: .leading) {
+            ForEach(searchService.suggestedItems.prefix(numberOfItems), id:\.self) { item in
+                SuggestionRowButton(suggestion: item, action: chooseSuggestion)
+                Divider()
+            }
+        }
         
+    }
+    
+    @ViewBuilder private var searchContent: some View {
+        ZStack {
+            if !showSuggestions {
+                ScrollView() {
+                    VStack(alignment: .trailing) {
+                        ForEach(searchService.resultItems, id:\.self) { item in
+                            ResultsRow(item: item, action: { _ in fullUpdateAndClose(item:item)})
+                        }
+                    }.frame(maxWidth: .infinity, alignment: .trailing)
+                }
+            }
+            
+            
+            if showSuggestions {
+                ScrollView {
+                    suggestionsList//.modifier(SuggestionsBackgroundModifier())
+                }
+            }
+            
+        }
     }
     
     func runSearch(_ suggestion:MKLocalSearchCompletion) {
@@ -86,33 +139,46 @@ public struct LocationSearchInlineView: View {
         searchService.clearSuggestions()
     }
     
-    
-    
-    struct SuggestionItemRow: View {
-        let item:MKLocalSearchCompletion
-        var body: some View {
-            
-            VStack(alignment: .leading) {
-                Text("\(item.title)")
-                Text("\(item.subtitle)").font(.caption)
-            }
-        }
+    func chooseSuggestion(item:MKLocalSearchCompletion) {
+        shouldSuggest = false
+        runSearch(item)
     }
-
+    
+    func fullUpdateAndClose(item:MKMapItem) {
+        updateSelected(item: item)
+        updateLocation()
+        endSearch()
+    }
+    
+    func updateSelected(item:MKMapItem) {
+        selectedItem = item
+    }
+    
+    func updateLocation() {
+        mapitem = selectedItem
+    }
+    
+    func endSearch() {
+        searching = false
+        searchService.clearSuggestions()
+        searchService.clearResults()
+    }
+    
+    
     var resultReveal:AnyTransition {
         //AnyTransition.scale(scale: 2, anchor: UnitPoint(x: 1, y: 0))
         AnyTransition.opacity.combined(with: .move(edge: .top)).combined(with: verticalClipTransition)
     }
-
+    
     struct VerticalClipEffect:ViewModifier {
         var value: CGFloat
-
+        
         func body(content: Content) -> some View {
             content
                 .clipShape(Rectangle().scale(x: 1, y: value, anchor: .top))
         }
     }
-
+    
     var verticalClipTransition:AnyTransition {
         .modifier(
             active: VerticalClipEffect(value: 0),
@@ -121,21 +187,7 @@ public struct LocationSearchInlineView: View {
     }
     
     
-    @ViewBuilder private var suggestionsList: some View {
-        VStack(alignment: .leading) {
-            ForEach(searchService.suggestedItems.prefix(numberOfItems), id:\.self) { item in
-                Button(action: {
-                    shouldSuggest = false
-                    runSearch(item)
-                    
-                }, label: {
-                    SuggestionItemRow(item: item)
-                })
-                Divider()
-            }
-            
-        }
-    }
+
     
     
     enum StyleConstants {
@@ -143,21 +195,21 @@ public struct LocationSearchInlineView: View {
         static let menuBackgroundOpacity = 0.5
     }
     
-    struct DropDownBackgroundModifier: ViewModifier {
-        
-        func body(content: Content) -> some View {
-            content
-                .background(Rectangle()
-                    .fill(Color(UIColor.systemGray6))
-                    .opacity(StyleConstants.menuBackgroundOpacity)
-                            //.foregroundStyle(.ultraThinMaterial)
-                )
-                .transition(.opacity)
-                .padding(EdgeInsets(top: 0, leading: StyleConstants.inset, bottom: 0, trailing: StyleConstants.inset))
-            
-            
-        }
-    }
+    //    struct SuggestionsBackgroundModifier: ViewModifier {
+    //
+    //        func body(content: Content) -> some View {
+    //            content
+    //                .background(Rectangle()
+    //                    .fill(Color(UIColor.systemGray6))
+    //                    .opacity(StyleConstants.menuBackgroundOpacity)
+    //                            //.foregroundStyle(.ultraThinMaterial)
+    //                )
+    //                .transition(.opacity)
+    //                .padding(EdgeInsets(top: 0, leading: StyleConstants.inset, bottom: 0, trailing: StyleConstants.inset))
+    //
+    //
+    //        }
+    //    }
     
     struct LocationSearchTextFieldStyle: TextFieldStyle {
         func _body(configuration: TextField<_Label>) -> some View {
@@ -170,8 +222,8 @@ public struct LocationSearchInlineView: View {
 
 
 
-struct LocationSearchInlineView_Previews: PreviewProvider {
-    static var previews: some View {
-        LocationSearchInlineView(resultCount: 5).environmentObject(LocationSearchService())
-    }
-}
+//struct LocationSearchInlineView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        LocationSearchInlineView(resultCount: 5).environmentObject(LocationSearchService())
+//    }
+//}

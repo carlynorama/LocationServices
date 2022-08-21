@@ -63,6 +63,7 @@ public struct LocationPicker: View {
     let style:LocationPickerStyle
     
     @State private var showingPopover = false
+    //@State private var showingSheet = false
     @State private var deviceLocation:CLLocation?
     
     public var body: some View {
@@ -74,18 +75,22 @@ public struct LocationPicker: View {
                 case .deviceLocation(let requester):
                     HStack {
                         openSearchButton
-                        CurrentLocationButton2(locationRequester: requester, mapItem: $item)
+                        CurrentLocationButton2(locationRequester: requester, item: $item)
                         
                     }.popover(isPresented: $showingPopover) {
-                        LocationPickerChooserContent(location: $item, style:style).environmentObject(searchService)
+                        LocationPickerChooserContent(mapitem: $item, style:style).environmentObject(searchService)
                     }
                 case .inlineSuggestions(let items):
                     SuggestionsPicker($item, suggestions: items).environmentObject(searchService)
                 case .inlineSearch:
-                    LocationSearchInlineView()
-                default:
+                    LocationSearchInlineView(mapitem: $item).environmentObject(searchService)
+                case .popoverSearch:
                     openSearchButton.popover(isPresented: $showingPopover) {
-                        LocationListSearchableSheet(location: $item)
+                        LocationSearchInlineView(mapitem: $item, reservingSpace: true).environmentObject(searchService).padding()
+                    }
+                default:
+                    openSearchButton.sheet(isPresented: $showingPopover) {
+                        LocationListSearchableSheet(mapitem: $item).environmentObject(searchService)
                         //LocationPickerChooserContent(location: $item, style:style).environmentObject(searchService)
                     }
                 }

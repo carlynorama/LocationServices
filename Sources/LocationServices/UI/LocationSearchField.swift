@@ -49,6 +49,11 @@ public struct LocationSearchField: View {
                 .onReceive(textObserver.$debouncedText) { (val) in
                     searchTextField = val
                 }
+                .onSubmit() {
+                    searchService.runKeywordSearch(for: searchTextField)
+                    searchService.addToRecentSearches(searchTextField)
+                    searchService.clearSuggestions()
+                }
                 .onChange(of: $searchTextField.wrappedValue) { text in
                     if shouldSuggest == true {
                         searchService.fetchSuggestions(with: searchTextField)

@@ -43,24 +43,50 @@ struct ResultsRow:View {
     var action:(MKMapItem)->()
     
     var body: some View {
-        HStack {
-            //                    Image(systemName: "globe").resizable()
-            //                        .aspectRatio(contentMode: .fit)
+//        HStack {
+//                                Image(systemName: "globe").resizable()
+//                                    .aspectRatio(contentMode: .fit)
             Button(action: { action(item) },
                    label: { MapItemRow(item: item) }
             ).buttonStyle(.bordered)
                 .layoutPriority(3)
         }
+  //  }
+}
+
+struct DefaultLabelTextStack:View {
+    let title:String
+    let description:String
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+                Text("\(title)")
+                .multilineTextAlignment(.leading)
+                .allowsTightening(true)
+                Text("\(description)")
+                .font(.caption)
+                .multilineTextAlignment(.leading)
+                .allowsTightening(true)
+            }
     }
 }
 
-struct SuggestionRow: View {
-    let item:MKLocalSearchCompletion
+struct SuggestionRowLabel: View {
+    let suggestion:MKLocalSearchCompletion
     public var body: some View {
-        VStack(alignment: .leading) {
-                Text("\(item.title)")
-                Text("\(item.subtitle)").font(.caption)
-            }
+        DefaultLabelTextStack(title: suggestion.title, description: suggestion.subtitle)
+    }
+}
+
+struct SuggestionRowButton:View {
+    let suggestion:MKLocalSearchCompletion
+    let action:(MKLocalSearchCompletion)->()
+    public var body: some View {
+        Button(action: {
+            action(suggestion)
+        }, label: {
+            SuggestionRowLabel(suggestion: suggestion)
+        })
     }
 }
 
@@ -93,13 +119,13 @@ struct LocationPickerLabelLayout:View {
         
         HStack {
             Image(systemName: "globe")
-                //.imageScale(.large)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-            VStack(alignment: .leading) {
-                Text(item.name ?? "No name provided")
-                Text(descriptionFromPlacemark(item.placemark))
-            }.layoutPriority(1)
+                .imageScale(.large)
+//                                        .resizable()
+//                                        .aspectRatio(contentMode: .fit)
+            DefaultLabelTextStack(
+                title: (item.name ?? "No name provided"),
+                description: (descriptionFromPlacemark(item.placemark))
+            ).layoutPriority(1)
         }.padding(5)
         
     }
@@ -116,18 +142,15 @@ struct LocationPickerLabelLayout:View {
     }
 }
 
-struct ChooserButton:View {
+struct CurrentSelectedButton:View {
     var item:MKMapItem
     var action:()->()
     var body: some View {
         Button(action: { action() }, label: {
-            VStack(alignment: .leading) {
-                Text(item.name ?? "No name provided")
-                HStack {
-                    Text("\(item.placemark.coordinate.latitude)" )
-                    Text("\(item.placemark.coordinate.longitude)" )
-                }
-            }
+            DefaultLabelTextStack(
+                title: (item.name ?? "No name provided"),
+                description: "\(item.placemark.coordinate.latitude)" + " " + "\(item.placemark.coordinate.longitude)"
+            )
         }).buttonStyle(.borderedProminent)
     }
 }
@@ -135,11 +158,11 @@ struct ChooserButton:View {
 
 struct CurrentLocationButton2: View {
     let locationRequester:()->CLLocation?
-    @Binding var mapItem:MKMapItem
+    @Binding var item:MKMapItem
     
     var body: some View {
         LocationButton(.currentLocation) {
-            mapItem = MKMapItem.forCurrentLocation()
+            item = MKMapItem.forCurrentLocation()
         }.symbolVariant(.fill)
             .labelStyle(.iconOnly)
             .foregroundColor(Color.white)

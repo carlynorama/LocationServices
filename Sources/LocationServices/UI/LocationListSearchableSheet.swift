@@ -14,14 +14,14 @@ struct LocationListSearchableSheet: View {
     @EnvironmentObject var searchService:LocationSearchService
     @Environment(\.presentationMode) var presentationMode
     
-    @State var selectedLocation:MKMapItem
-    @Binding var location:MKMapItem
+    @State var selectedItem:MKMapItem
+    @Binding var mapitem:MKMapItem
     //END SAME
     
     //Does not care about style. 
-    init(location locbind:Binding<MKMapItem>) {
-        self._location = locbind
-        self._selectedLocation = State(initialValue: locbind.wrappedValue)
+    init(mapitem locbind:Binding<MKMapItem>) {
+        self._mapitem = locbind
+        self._selectedItem = State(initialValue: locbind.wrappedValue)
     }
 
     
@@ -35,7 +35,7 @@ struct LocationListSearchableSheet: View {
     var body: some View {
         NavigationView {
                 VStack {
-                    ChooserButton(item: selectedLocation, action: updateLocation)
+                    CurrentSelectedButton(item: selectedItem, action: updateLocation)
                     List(searchService.resultItems, id:\.self) { item in
                         
                         ResultsRow(item: item, action: { _ in updateSelected(item: item)})
@@ -47,11 +47,12 @@ struct LocationListSearchableSheet: View {
                                 }
                             }
                             ForEach(searchService.suggestedItems) { suggestion in
-                                SuggestionRow(item: suggestion)
+                                SuggestionRowLabel(suggestion: suggestion)
                                     .searchCompletion(suggestion.title + " " + suggestion.subtitle)
                             }
                         }.onChange(of: searchText) { newQuery in
-                            //does the search field provide teh debounce?
+                            //does the search field provide the debounce?
+                            //add the one bite of the aple code from custom search field?
                             searchService.fetchSuggestions(with: newQuery)
                         }.onSubmit(of: .search) {
                             searchService.runKeywordSearch(for: searchText)
@@ -72,14 +73,14 @@ struct LocationListSearchableSheet: View {
     }
     
     func updateSelected(item:MKMapItem) {
-        selectedLocation = item
+        selectedItem = item
         //if searchService.resultItems.count == 1 {
             updateLocation()
         //}
     }
     
     func updateLocation() {
-        location = selectedLocation
+        mapitem = selectedItem
         searchService.clearSuggestions()
         close()
     }

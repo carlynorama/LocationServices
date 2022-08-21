@@ -24,6 +24,7 @@ public final class LocationSearchService:NSObject, ObservableObject {
         searchCompleter.delegate = self
     }
 
+    @Published public private(set) var selectedResult:MKMapItem?
     @Published public private(set) var resultItems:[MKMapItem] = []
     
     var searchCompleter:MKLocalSearchCompleter

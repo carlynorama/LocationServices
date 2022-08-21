@@ -11,14 +11,14 @@ struct LocationPickerChooserContent:View {
     @EnvironmentObject var searchService:LocationSearchService
     @Environment(\.presentationMode) var presentationMode
     
-    @State var selectedLocation:MKMapItem
-    @Binding var location:MKMapItem
+    @State var selectedItem:MKMapItem
+    @Binding var mapitem:MKMapItem
     
     var style:LocationPickerStyle
     
-    init(location locbind:Binding<MKMapItem>, style:LocationPickerStyle) {
-        self._location = locbind
-        self._selectedLocation = State(initialValue: locbind.wrappedValue)
+    init(mapitem locbind:Binding<MKMapItem>, style:LocationPickerStyle) {
+        self._mapitem = locbind
+        self._selectedItem = State(initialValue: locbind.wrappedValue)
         self.style = style
     }
     
@@ -36,11 +36,11 @@ struct LocationPickerChooserContent:View {
             HStack(alignment: .firstTextBaseline) {
                 Text("Location:")
                 Spacer()
-                ChooserButton(item: selectedLocation, action: updateLocation)
+                CurrentSelectedButton(item: selectedItem, action: updateLocation)
             }
             switch style {
             case .popoverSearchWithSuggestions(let suggestions):
-                SuggestionsPicker($selectedLocation, suggestions: suggestions)
+                SuggestionsPicker($selectedItem, suggestions: suggestions)
             default:
                 EmptyView()
             }
@@ -63,11 +63,11 @@ struct LocationPickerChooserContent:View {
     }
     
     func updateSelected(item:MKMapItem) {
-        selectedLocation = item
+        selectedItem = item
     }
     
     func updateLocation() {
-        location = selectedLocation
+        mapitem = selectedItem
         close()
     }
     
