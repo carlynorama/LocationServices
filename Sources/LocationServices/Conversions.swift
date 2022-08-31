@@ -12,6 +12,7 @@ import MapKit
 
 public extension Locatable {
     func asMapItem() -> MKMapItem {
+        //This can fail badly.
         MKMapItem(placemark: MKPlacemark(coordinate: self.location.coordinate))
     }
 }
@@ -35,9 +36,9 @@ public extension LSLocation {
     }
     
     //relies of locatable extension
-    init(from mkmapitem:MKMapItem) {
-        self.latitude = mkmapitem.latitude
-        self.longitude = mkmapitem.longitude
+    init?(from mkmapitem:MKMapItem) {
+        self.latitude = mkmapitem.placemark.coordinate.latitude
+        self.longitude = mkmapitem.placemark.coordinate.longitude
         self.description = LocationServices.descriptionFromMapItem(mkmapitem)
     }
 }

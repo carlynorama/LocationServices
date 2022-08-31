@@ -7,6 +7,13 @@
 
 import Foundation
 import CoreLocation
+import MapKit
+
+extension MKMapItem {
+    static var example:MKMapItem {
+        CLLocation(latitude: 34.0536909, longitude: -118.242766).asMapItem()
+    }
+}
 
 #if DEBUG
 public class LoremIpsunLocationSetAmmet:LocationService {

@@ -16,7 +16,7 @@ public struct LocationSearchInlineView: View {
     @Binding var mapitem:MKMapItem
     
     //Does not care about style.
-    init(mapitem locbind:Binding<MKMapItem>, resultCount:Int = 8, reservingSpace:Bool = false) {
+    public init(mapitem locbind:Binding<MKMapItem>, resultCount:Int = 8, reservingSpace:Bool = false) {
         self._mapitem = locbind
         self._selectedItem = State(initialValue: locbind.wrappedValue)
         self.numberOfItems = resultCount
@@ -81,9 +81,10 @@ public struct LocationSearchInlineView: View {
                         .transition(resultReveal)
                 }
             } else {
-                ZStack {
+                ReserveSpaceWithFirstView(count: numberOfItems) {
+                    ResultsRow(item: MKMapItem.example, action: { _ in print("Placeholder")}).opacity(0)
                     searchContent
-                }.frame(minHeight: 200, maxHeight: 400)
+                }//.frame(minHeight: 200, maxHeight: 400)
             }
             
         }
@@ -218,6 +219,44 @@ public struct LocationSearchInlineView: View {
                 .background(RoundedRectangle(cornerRadius: StyleConstants.inset).fill(Color(UIColor.systemGray6)))
         }
     }
+}
+
+
+
+fileprivate struct ReserveSpaceWithFirstView:Layout {
+    
+    //needs a sizeThatFits
+    let count:Int
+    let widthComfort = 1.3
+    
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let sizeLimiter = subviews[0].sizeThatFits(.unspecified)
+        let suggestedSize = proposal.replacingUnspecifiedDimensions()
+        let size = CGSize(width: max(sizeLimiter.width * widthComfort, suggestedSize.width).rounded(), height: max(sizeLimiter.height * CGFloat(count), suggestedSize.height))
+        return size
+    }
+    
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard subviews.count == 2 else {
+            print("This a container for 1 right now.")
+            fatalError("This a container for 1 right now.")
+        }
+        
+        
+//        subviews[0].place(
+//            at: CGPoint(x: -1000, y: -1000),
+//            proposal: proposal
+//        )
+        
+        subviews[1].place(
+            at: bounds.origin,
+            proposal: proposal
+        )
+        
+        
+    }
+    
+    
 }
 
 
