@@ -16,6 +16,8 @@ struct LocationPickerChooserContent:View {
     
     var style:LocationPickerStyle
     
+    var numberOfItems = 8
+    
     init(mapitem locbind:Binding<MKMapItem>, style:LocationPickerStyle) {
         self._mapitem = locbind
         self._selectedItem = State(initialValue: locbind.wrappedValue)
@@ -49,9 +51,15 @@ struct LocationPickerChooserContent:View {
                 
             }.zIndex(10)
             //List(1..<5) { _ in
-            List(searchService.resultItems, id:\.self) { item in
-                ResultsRow(item: item, action: { _ in fullUpdateAndClose(item: item) })
-            }.listStyle(.plain)
+            
+            ReserveSpaceWithFirstView(count: numberOfItems) {
+                ResultsRow(item: MKMapItem.example, action: { _ in print("Placeholder")}).opacity(0)
+                //searchContent
+                
+                List(searchService.resultItems, id:\.self) { item in
+                    ResultsRow(item: item, action: { _ in fullUpdateAndClose(item: item) })
+                }.listStyle(.plain)
+            }
         }.environmentObject(searchService)
             .padding(15)
 

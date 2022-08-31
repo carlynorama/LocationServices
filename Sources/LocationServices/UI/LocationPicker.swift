@@ -86,7 +86,8 @@ public struct LocationPicker: View {
                     LocationSearchInlineView(mapitem: $item).environmentObject(searchService)
                 case .popoverSearch:
                     openSearchButton.popover(isPresented: $showingPopover) {
-                        LocationSearchInlineView(mapitem: $item, reservingSpace: true).environmentObject(searchService).padding()
+                        //LocationSearchInlineView(mapitem: $item, reservingSpace: true).environmentObject(searchService).padding()
+                        LocationPickerChooserContent(mapitem: $item, style:style).environmentObject(searchService)
                     }
                 default:
                     openSearchButton.sheet(isPresented: $showingPopover) {

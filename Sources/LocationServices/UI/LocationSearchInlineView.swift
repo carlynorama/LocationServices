@@ -223,7 +223,7 @@ public struct LocationSearchInlineView: View {
 
 
 
-fileprivate struct ReserveSpaceWithFirstView:Layout {
+struct ReserveSpaceWithFirstView:Layout {
     
     //needs a sizeThatFits
     let count:Int
