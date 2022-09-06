@@ -10,18 +10,19 @@ import CoreLocation
 import MapKit
 
 
-
-public protocol LocationService:ObservableObject {
+//public protocol LocationService:ObservableObject {
+public protocol LocationBroadcaster {
     var defaultLocation:CLLocation { get set }
-    
     var locationToUse:CLLocation { get }
-    var locationPublisher:Published<CLLocation>.Publisher { get }
-    var locationPublished: Published<CLLocation> { get }
-    
     var deviceLocation:CLLocation? { get }
 }
 
-public extension LocationService {
+public protocol LocationPublisher:LocationBroadcaster & ObservableObject {
+    var locationPublisher:Published<CLLocation>.Publisher { get }
+    var locationPublished: Published<CLLocation> { get }
+}
+
+public extension LocationBroadcaster {
     
     var latitude:Double { locationToUse.coordinate.latitude }
     var longitude:Double { locationToUse.coordinate.longitude }
@@ -48,7 +49,7 @@ public extension LocationService {
 }
 
 
-public final class LocationManager: NSObject, ObservableObject,LocationService  {
+public final class LocationManager: NSObject, ObservableObject, LocationBroadcaster  {
     public static let shared = LocationManager()
     
     let manager = CLLocationManager()

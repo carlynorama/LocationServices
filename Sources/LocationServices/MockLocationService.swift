@@ -16,7 +16,7 @@ extension MKMapItem {
 }
 
 #if DEBUG
-public class LoremIpsunLocationSetAmmet:LocationService {
+public class LoremIpsunLocationSetAmmet:LocationBroadcaster {
     public var defaultLocation = CLLocation(latitude: 34.0536909,
                                             longitude: -118.242766)
     @Published public var locationToUse:CLLocation = CLLocation(latitude: 34.0536909,
