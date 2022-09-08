@@ -13,20 +13,23 @@ import MapKit
 //public protocol LocationService:ObservableObject {
 public protocol LocationBroadcaster {
     var defaultLocation:CLLocation { get set }
+    
     var locationToUse:CLLocation { get }
     var locationName:String { get }
+    var lslocationToUse:LSLocation { get }
+    
     var deviceLocation:CLLocation? { get }
     var deviceLocality:String? { get }
+    
 }
 
-public protocol LocationPublisher:LocationBroadcaster & ObservableObject {
+public protocol LocationPublisher:LocationBroadcaster {
     var locationPublisher:Published<CLLocation>.Publisher { get }
-    var locationPublished: Published<CLLocation> { get }
+    var locationPublished:Published<CLLocation> { get }
+    var lslocationPublisher:Published<LSLocation>.Publisher { get }
+    var lslocationPublished:Published<LSLocation> { get }
 }
 
-public protocol LocationStreamer:LocationBroadcaster {
-    var locationStream:AsyncStream<LSLocation> { get }
-}
 
 public extension LocationBroadcaster {
     
@@ -54,7 +57,5 @@ public extension LocationBroadcaster {
     }
 }
 
-public extension LocationStreamer {
-    
-}
+
 
