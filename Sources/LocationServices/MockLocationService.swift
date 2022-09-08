@@ -17,6 +17,9 @@ extension MKMapItem {
 
 #if DEBUG
 public class LoremIpsunLocationSetAmmet:LocationBroadcaster {
+    public var locationName: String = "Los Angeles"
+    public var deviceLocality: String? = "Los Angeles"
+    
     public var defaultLocation = CLLocation(latitude: 34.0536909,
                                             longitude: -118.242766)
     @Published public var locationToUse:CLLocation = CLLocation(latitude: 34.0536909,
