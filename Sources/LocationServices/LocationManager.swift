@@ -141,17 +141,18 @@ extension LocationManager {
     func updateDescription() {
         Task {
             do {
-                DispatchQueue.main.async {
+                await MainActor.run {
                     self.locationName = "..."
                 }
                 let placemark = try await Self.placemarkForLocation(locationToUse)
                 let string = Self.descriptionFromPlacemark(placemark)
                 
-                DispatchQueue.main.async {
+                await MainActor.run {
                     self.locationName =  string//?? "No place name available"
                 }
-                
-            lslocationToUse = LSLocation(coordinates: locationToUse, name: locationName)
+                await MainActor.run {
+                    lslocationToUse = LSLocation(coordinates: locationToUse, name: locationName)
+                }
                 
             } catch {
                 print("LM updateDescription: couldn't find locality")

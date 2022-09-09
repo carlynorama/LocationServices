@@ -10,7 +10,7 @@ import CoreLocation
 import MapKit
 
 
-//public protocol LocationService:ObservableObject {
+
 public protocol LocationBroadcaster {
     var defaultLocation:CLLocation { get set }
     
@@ -36,12 +36,9 @@ public extension LocationBroadcaster {
     var latitude:Double { locationToUse.coordinate.latitude }
     var longitude:Double { locationToUse.coordinate.longitude }
     
-    // TODO:Returns a string that is a location in memory?
-    //    var description:String? {
-    //        get async throws {
-    //            try await Self.placemarkForLocation(self.locationToUse).locality
-    //        }
-    //    }
+}
+
+extension LocationBroadcaster {
     
     static func placemarkForLocation(_ location:CLLocation) async throws -> CLPlacemark {
         try await LocationServices.placemarkForLocation(location)
