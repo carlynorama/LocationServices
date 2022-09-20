@@ -87,9 +87,9 @@ public struct LocationPicker: View {
                 case .inlineSuggestions(let items):
                     SuggestionsPicker($item, suggestions: items).environmentObject(searchService)
                 case .inlineSearch:
-                    #if canImport(Layout)
+                    
                     LocationSearchInlineView(mapitem: $item).environmentObject(searchService)
-                    #endif
+                    
                 case .popoverSearch:
                     openSearchButton.popover(isPresented: $showingPopover) {
                         //LocationSearchInlineView(mapitem: $item, reservingSpace: true).environmentObject(searchService).padding()
