@@ -7,8 +7,10 @@
 
 import SwiftUI
 import MapKit
-import CoreLocationUI
 
+#if canImport(CoreLocationUI)
+import CoreLocationUI
+#endif
 
 public struct MapItemRow:View {
     public init(item:MKMapItem) {
@@ -155,7 +157,7 @@ struct CurrentSelectedButton:View {
     }
 }
 
-
+#if canImport(CoreLocationUI)
 struct CurrentLocationButton2: View {
     let locationRequester:()->CLLocation?
     @Binding var item:MKMapItem
@@ -187,7 +189,7 @@ struct CurrentLocationButton: View {
         
     }
 }
-
+#endif
 
 @ViewBuilder func SuggestionsPicker(_ selectedLocation:Binding<MKMapItem>, suggestions:[MKMapItem]) -> some View {
     HStack {

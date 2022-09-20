@@ -8,7 +8,7 @@
 import SwiftUI
 import MapKit
 
-
+#if canImport(Layout)
 
 public struct LocationSearchInlineView: View {
     
@@ -266,3 +266,4 @@ struct ReserveSpaceWithFirstView:Layout {
 //        LocationSearchInlineView(resultCount: 5).environmentObject(LocationSearchService())
 //    }
 //}
+#endif

@@ -5,6 +5,8 @@
 //  Created by Labtanza on 8/19/22.
 //
 
+
+
 import SwiftUI
 import MapKit
 
@@ -75,7 +77,9 @@ public struct LocationPicker: View {
                 case .deviceLocation(let requester):
                     HStack {
                         openSearchButton
+                        #if canImport(CoreLocationUI)
                         CurrentLocationButton2(locationRequester: requester, item: $item)
+                        #endif
                         
                     }.popover(isPresented: $showingPopover) {
                         LocationPickerChooserContent(mapitem: $item, style:style).environmentObject(searchService)
@@ -83,7 +87,9 @@ public struct LocationPicker: View {
                 case .inlineSuggestions(let items):
                     SuggestionsPicker($item, suggestions: items).environmentObject(searchService)
                 case .inlineSearch:
+                    #if canImport(Layout)
                     LocationSearchInlineView(mapitem: $item).environmentObject(searchService)
+                    #endif
                 case .popoverSearch:
                     openSearchButton.popover(isPresented: $showingPopover) {
                         //LocationSearchInlineView(mapitem: $item, reservingSpace: true).environmentObject(searchService).padding()
@@ -124,3 +130,4 @@ public struct LocationPicker: View {
 //        LocationPicker()
 //    }
 //}
+

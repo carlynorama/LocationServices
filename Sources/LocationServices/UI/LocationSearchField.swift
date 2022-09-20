@@ -157,7 +157,13 @@ public struct LocationSearchField: View {
     enum StyleConstants {
         static let inset = 5.0
         static let menuBackgroundOpacity = 0.2
+        
+#if os(iOS)
         static let textFieldBackground = Color(UIColor.systemGray6)
+#elseif os(macOS)
+        static let textFieldBackground = Color(nsColor: NSColor.lightGray)
+#endif
+       
         // are Color(UIColor.systemGray6) and Color(UIColor.tertiarySystemFill) the same?
         // what is the default Divder() color?
     }

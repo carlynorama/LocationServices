@@ -51,7 +51,7 @@ struct LocationPickerChooserContent:View {
                 
             }.zIndex(10)
             //List(1..<5) { _ in
-            
+            #if canImport(Layout)
             ReserveSpaceWithFirstView(count: numberOfItems) {
                 ResultsRow(item: MKMapItem.example, action: { _ in print("Placeholder")}).opacity(0)
                 //searchContent
@@ -60,6 +60,7 @@ struct LocationPickerChooserContent:View {
                     ResultsRow(item: item, action: { _ in fullUpdateAndClose(item: item) })
                 }.listStyle(.plain)
             }
+            #endif
         }.environmentObject(searchService)
             .padding(15)
 
