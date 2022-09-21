@@ -25,14 +25,16 @@ public extension LSLocation {
         } else {
             return nil
         }
-        
+        self.initializingPlacemark = placemark
         self.description = LocationServices.descriptionFromPlacemark(placemark)
     }
     
-    init(coordinates:CLLocation, name:String) {
-        self.latitude = coordinates.latitude
-        self.longitude = coordinates.longitude
+    init(cllocation:CLLocation, name:String) {
+        self.latitude = cllocation.latitude
+        self.longitude = cllocation.longitude
         self.description = name
+        
+        self.initializingCLLocation = cllocation
     }
     
     //relies of locatable extension
@@ -40,5 +42,7 @@ public extension LSLocation {
         self.latitude = mkmapitem.placemark.coordinate.latitude
         self.longitude = mkmapitem.placemark.coordinate.longitude
         self.description = LocationServices.descriptionFromMapItem(mkmapitem)
+        
+        self.initializingMKMapItem = mkmapitem
     }
 }

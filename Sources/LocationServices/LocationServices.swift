@@ -14,6 +14,25 @@ public enum LocationServices {
         return firstLocation
     }
     
+    @available(*, deprecated, message: "Use async call instead.")
+    static func placemarkForLocation(_ location:CLLocation, completionHandler: @escaping (CLPlacemark?)
+                               -> Void ) {
+        let geocoder = CLGeocoder()
+        
+        // Look up the location and pass it to the completion handler
+        geocoder.reverseGeocodeLocation(location,
+                                        completionHandler: { (placemarks, error) in
+            if error == nil {
+                let firstLocation = placemarks?[0]
+                completionHandler(firstLocation)
+            }
+            else {
+                // An error occurred during geocoding.
+                completionHandler(nil)
+            }
+        })
+    }
+    
     
     static func locationForString(_ addressString:String) async throws -> CLLocation? {
         let result = try await CLGeocoder().geocodeAddressString(addressString)
@@ -31,6 +50,19 @@ public enum LocationServices {
     
     static func descriptionFromMapItem(_ mkmapitem:MKMapItem) -> String {
         String([mkmapitem.name, mkmapitem.placemark.administrativeArea, mkmapitem.placemark.country].compactMap({$0}).joined(separator: ", "))
+    }
+    
+    static func locationsForPlacemarks(_ placemarks:[CLPlacemark]) -> [LSLocation]{
+        var tmp:[LSLocation?] = []
+        for item in placemarks {
+            //print(item)
+            if let asLocation = LSLocation(from: item) {
+                tmp.append(asLocation)
+            } else {
+                print("Could not turn into Location.")
+            }
+        }
+        return tmp.compactMap { $0 }
     }
     
     

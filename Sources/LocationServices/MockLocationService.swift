@@ -16,7 +16,7 @@ extension MKMapItem {
 }
 
 
-public class LoremIpsunLocationSetAmmet:LocationBroadcaster {
+public class LoremIpsunLocationSetAmmet:LocationHandler {
     
     
     public var locationName: String = "Los Angeles"

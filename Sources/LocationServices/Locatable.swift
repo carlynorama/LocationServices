@@ -19,52 +19,24 @@ public extension Locatable {
 //    public var id:String {
 //        "\(latitude)+\(longitude)"
 //    }
-//    var description:String {
-//        "LAT: \(latitude), LONG: \(longitude)"
-//    }
+    
+    var coordinateString:String {
+        "lat: \(latitude.formatted(.number.precision(.fractionLength(4)))), long: \(longitude.formatted(.number.regex.))"
+    }
     
     var location:CLLocation {
         CLLocation(latitude: latitude, longitude: longitude)
     }
-    
-    var placemark:CLPlacemark {
-        get async throws {
-            try await lookUpPlacemark()
-        }
-    }
-    
-    var placemarkDescription:String? {
-        get async throws {
-            try await lookUpPlacemark().locality
-        }
-    }
-    
-    
-    func lookUpCurrentLocation(completionHandler: @escaping (CLPlacemark?)
-                               -> Void ) {
-        // Use the last reported location.
-        let location = self.location
-        let geocoder = CLGeocoder()
-        
-        // Look up the location and pass it to the completion handler
-        geocoder.reverseGeocodeLocation(location,
-                                        completionHandler: { (placemarks, error) in
-            if error == nil {
-                let firstLocation = placemarks?[0]
-                completionHandler(firstLocation)
-            }
-            else {
-                // An error occurred during geocoding.
-                completionHandler(nil)
-            }
-        })
-    }
+
     
     func lookUpPlacemark() async throws -> CLPlacemark {
-        let result = try await CLGeocoder().reverseGeocodeLocation(self.location)
-        let firstLocation = result[0]
-        return firstLocation
+        try await LocationServices.placemarkForLocation(self.location)
     }
+    
+    func placemarkDescription() async throws -> String? {
+        try await LocationServices.placemarkForLocation(self.location).locality
+    }
+    
 }
 
 

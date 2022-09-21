@@ -18,20 +18,37 @@ public struct LSLocation:Locatable, Hashable, Identifiable {
     public var id:String {
         "\(latitude)+\(longitude)"
     }
+    
+    public let initializingCLLocation:CLLocation?
+    public let initializingPlacemark:CLPlacemark?
+    public let initializingMKMapItem:MKMapItem?
 
 }
 
 public extension LSLocation {
-    static func locationsForPlacemarks(_ placemarks:[CLPlacemark]) -> [LSLocation]{
-        var tmp:[LSLocation?] = []
-        for item in placemarks {
-            //print(item)
-            if let asLocation = LSLocation(from: item) {
-                tmp.append(asLocation)
+    var cllocation:CLLocation {
+        if let initializingCLLocation {
+            return initializingCLLocation
+        } else {
+            return CLLocation(latitude: latitude, longitude: longitude)
+        }
+    }
+    
+    var placemark:CLPlacemark {
+        get async throws {
+            if let initializingPlacemark {
+                return initializingPlacemark
             } else {
-                print("Could not turn into Location.")
+                return try await lookUpPlacemark()
             }
         }
-        return tmp.compactMap { $0 }
+    }
+    
+}
+
+
+public extension LSLocation {
+    static func locationsForPlacemarks(_ placemarks:[CLPlacemark]) -> [LSLocation]{
+        LocationServices.locationsForPlacemarks(placemarks)
     }
 }

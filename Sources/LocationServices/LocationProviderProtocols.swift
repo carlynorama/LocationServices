@@ -11,7 +11,7 @@ import MapKit
 
 
 
-public protocol LocationBroadcaster {
+public protocol LocationHandler {
     var defaultLocation:CLLocation { get set }
     
     var locationToUse:CLLocation { get }
@@ -23,22 +23,30 @@ public protocol LocationBroadcaster {
     
 }
 
-public protocol LocationPublisher:LocationBroadcaster {
+public protocol CLLocationPublisher:LocationHandler {
     var locationPublisher:Published<CLLocation>.Publisher { get }
     var locationPublished:Published<CLLocation> { get }
+}
+
+public protocol LSLocationPublisher:LocationHandler {
     var lslocationPublisher:Published<LSLocation>.Publisher { get }
     var lslocationPublished:Published<LSLocation> { get }
 }
 
+public protocol LocationNotifier:LocationHandler {
+    var notificationCenter:NotificationCenter { get }
+    var notificationName:Notification.Name { get }
+}
 
-public extension LocationBroadcaster {
+
+public extension LocationHandler {
     
     var latitude:Double { locationToUse.coordinate.latitude }
     var longitude:Double { locationToUse.coordinate.longitude }
     
 }
 
-extension LocationBroadcaster {
+extension LocationHandler {
     
     func placemarkForLocation(_ location:CLLocation) async throws -> CLPlacemark {
         try await LocationServices.placemarkForLocation(location)
