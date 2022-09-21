@@ -12,13 +12,10 @@ import MapKit
 
 
 public final class LocationManager: NSObject, ObservableObject, LocationPublisher  {
-
-    
-    
-    
     public static let shared = LocationManager()
     
     let manager = CLLocationManager()
+    var locationContinuation: CheckedContinuation<CLLocationCoordinate2D?, Error>?
     
     @Published public var deviceLocation:CLLocation?
     @Published public var deviceLocality:String?
@@ -70,6 +67,7 @@ public final class LocationManager: NSObject, ObservableObject, LocationPublishe
 }
 
 extension LocationManager:CLLocationManagerDelegate {
+   
     
     public var isEnabled:Bool? {
         switch manager.authorizationStatus {
@@ -98,24 +96,26 @@ extension LocationManager:CLLocationManagerDelegate {
     }
     
     public func locationManager(_ manager:CLLocationManager, didUpdateLocations locations:[CLLocation]) {
-        
-        deviceLocation = locations.first//?.coordinate
-        updateLocality()
-        if let loc = deviceLocation {
-            locationToUse = loc
-        } else {
-            locationToUse = defaultLocation
-        }
-        updateDescription()
-        
+        locationContinuation?.resume(returning: locations.first?.coordinate)
     }
+    
+    
+    //locationContinuation?.resume(returning: locations.first?.coordinate)
     
     public func locationManager(_ manager:CLLocationManager, didFailWithError error:Error) {
-        print("Error requesting location")
+        locationContinuation?.resume(throwing: error)
     }
     
+    @available(*, deprecated, message: "Use async instead")
     public func requestLocation() {
         manager.requestLocation()
+    }
+    
+    func requestLocation() async throws -> CLLocationCoordinate2D? {
+        try await withCheckedThrowingContinuation { continuation in
+            locationContinuation = continuation
+            manager.requestLocation()
+        }
     }
 }
 
@@ -174,6 +174,16 @@ extension LocationManager {
         self.locationName = location.description
     }
     
+    
+    func updateStoredLocations(_ location:) async {
+        updateLocality()
+        if let loc = deviceLocation {
+            locationToUse = loc
+        } else {
+            locationToUse = defaultLocation
+        }
+        updateDescription()
+    }
     
 }
 
