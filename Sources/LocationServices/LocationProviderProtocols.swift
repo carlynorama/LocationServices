@@ -40,16 +40,16 @@ public extension LocationBroadcaster {
 
 extension LocationBroadcaster {
     
-    static func placemarkForLocation(_ location:CLLocation) async throws -> CLPlacemark {
+    func placemarkForLocation(_ location:CLLocation) async throws -> CLPlacemark {
         try await LocationServices.placemarkForLocation(location)
     }
     
     
-    static func locationForString(_ addressString:String) async throws -> CLLocation? {
+    func locationForString(_ addressString:String) async throws -> CLLocation? {
         try await LocationServices.locationForString(addressString)
     }
     
-    static func descriptionFromPlacemark(_ placemark:CLPlacemark) -> String {
+    func descriptionFromPlacemark(_ placemark:CLPlacemark) -> String {
         LocationServices.descriptionFromPlacemark(placemark)
     }
 }

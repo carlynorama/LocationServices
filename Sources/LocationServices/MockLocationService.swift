@@ -15,7 +15,7 @@ extension MKMapItem {
     }
 }
 
-#if DEBUG
+
 public class LoremIpsunLocationSetAmmet:LocationBroadcaster {
     
     
@@ -104,4 +104,4 @@ public class LoremIpsunLocationSetAmmet:LocationBroadcaster {
     ]
 }
 
-#endif
+

@@ -2,9 +2,7 @@ import Foundation
 import CoreLocation
 import MapKit
 
-public struct LocationServices {
-    public init() {
-    }
+public enum LocationServices {
     
     public static var defaultLocation:CLLocation {
         LocationStore.locations[0].location
