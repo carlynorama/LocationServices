@@ -20,8 +20,14 @@ public extension Locatable {
 //        "\(latitude)+\(longitude)"
 //    }
     
-    var coordinateString:String {
-        "lat: \(latitude.formatted(.number.precision(.fractionLength(4)))), long: \(longitude.formatted(.number.regex.))"
+    var decimalString:String {
+        "lat: \(latitude.formatted(.number.precision(.fractionLength(4)))), long: \(longitude.formatted(.number.precision(.fractionLength(4))))"
+    }
+    
+    var dmsString:String {
+        let latString = LocationServices.latitudeString(for: latitude)
+        let longString = LocationServices.latitudeString(for: longitude)
+        return "\(latString), \(longString)"
     }
     
     var location:CLLocation {

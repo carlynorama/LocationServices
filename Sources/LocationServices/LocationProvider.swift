@@ -22,7 +22,7 @@ class LocationProvider {
                                                                 longitude: -118.242766)
     @Published public var locationName:String = "Default Location"
     
-    @Published public var lslocationToUse:LSLocation = LSLocation(coordinates: CLLocation(latitude: 34.0536909,longitude: -118.242766), name: "Start Location")
+    @Published public var lslocationToUse:LSLocation = LSLocation(cllocation: CLLocation(latitude: 34.0536909,longitude: -118.242766), name: "Start Location")
     
     //    static func determineLocationToUse(_ location:CLLocation? = nil) -> CLLocation {
     //        if let loc = location {
@@ -70,7 +70,7 @@ extension LocationProvider {
                     self.locationName =  string//?? "No place name available"
                 }
                 await MainActor.run {
-                    lslocationToUse = LSLocation(coordinates: locationToUse, name: locationName)
+                    lslocationToUse = LSLocation(cllocation: locationToUse, name: locationName)
                 }
                 
             } catch {
@@ -94,15 +94,15 @@ extension LocationProvider {
     }
     
     
-    func updateStoredLocations(_ location:) async {
-        updateLocality()
-        if let loc = deviceLocation {
-            locationToUse = loc
-        } else {
-            locationToUse = defaultLocation
-        }
-        updateDescription()
-    }
+//    func updateStoredLocations(_ location:) async {
+//        updateLocality()
+//        if let loc = deviceLocation {
+//            locationToUse = loc
+//        } else {
+//            locationToUse = defaultLocation
+//        }
+//        updateDescription()
+//    }
     
 }
 

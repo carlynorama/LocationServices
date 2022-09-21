@@ -22,11 +22,16 @@ public extension LSLocation {
         if let location = placemark.location {
             self.latitude = location.coordinate.latitude
             self.longitude = location.coordinate.longitude
+            
+            self.initializingPlacemark = placemark
+            self.description = LocationServices.descriptionFromPlacemark(placemark)
+            self.initializingMKMapItem = nil
+            self.initializingCLLocation = nil
+            
         } else {
             return nil
         }
-        self.initializingPlacemark = placemark
-        self.description = LocationServices.descriptionFromPlacemark(placemark)
+
     }
     
     init(cllocation:CLLocation, name:String) {
@@ -35,6 +40,8 @@ public extension LSLocation {
         self.description = name
         
         self.initializingCLLocation = cllocation
+        self.initializingPlacemark = nil
+        self.initializingMKMapItem = nil
     }
     
     //relies of locatable extension
@@ -44,5 +51,7 @@ public extension LSLocation {
         self.description = LocationServices.descriptionFromMapItem(mkmapitem)
         
         self.initializingMKMapItem = mkmapitem
+        self.initializingCLLocation = nil
+        self.initializingPlacemark = nil
     }
 }

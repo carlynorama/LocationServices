@@ -23,6 +23,15 @@ public struct LSLocation:Locatable, Hashable, Identifiable {
     public let initializingPlacemark:CLPlacemark?
     public let initializingMKMapItem:MKMapItem?
 
+    init(latitude: Double, longitude: Double, description: String) {
+        self.latitude = latitude
+        self.longitude = longitude
+        self.description = description
+        self.initializingCLLocation = nil
+        self.initializingPlacemark = nil
+        self.initializingMKMapItem = nil
+    }
+    
 }
 
 public extension LSLocation {

@@ -16,7 +16,7 @@ public enum LocationServices {
     
     @available(*, deprecated, message: "Use async call instead.")
     static func placemarkForLocation(_ location:CLLocation, completionHandler: @escaping (CLPlacemark?)
-                               -> Void ) {
+                                     -> Void ) {
         let geocoder = CLGeocoder()
         
         // Look up the location and pass it to the completion handler
@@ -80,5 +80,29 @@ public enum LocationServices {
     //            }
     //        }
     //    }
+    
+    static func dms(for number:some BinaryFloatingPoint) -> (degrees: Int, minutes: Int, seconds: Int, isPositive:Bool) {
+        let isPositive = number >= 0
+        let totalSeconds = abs(number * 3600)
+        let degrees = Int(totalSeconds / 3600)
+        let remainder = totalSeconds.truncatingRemainder(dividingBy: 3600)
+        //also remainder = totalSeconds % 3600) if int conversion then
+        //TODO: Compare performance?
+        let minutes = Int(remainder / 60)
+        let seconds = Int(remainder.truncatingRemainder(dividingBy: 60))
+        return (degrees, minutes, seconds, isPositive)
+    }
+    
+    static func latitudeString(for number:some BinaryFloatingPoint) -> String {
+        let (degrees, minutes, seconds, isPositive) = Self.dms(for: number)
+        return String(format: "%@ %d°%d'%d\"", isPositive ? "N" : "S", abs(degrees), minutes, seconds)
+    }
+    
+    static func longitudeString(for number:some BinaryFloatingPoint) -> String {
+        let (degrees, minutes, seconds, isPositive) = Self.dms(for: number)
+        return String(format: "%@ %%d°%d'%d\"", isPositive ? "E" : "W", abs(degrees), minutes, seconds)
+    }
+    
+    
     
 }

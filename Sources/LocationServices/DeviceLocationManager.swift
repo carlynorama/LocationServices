@@ -11,7 +11,7 @@ import MapKit
 
 
 
-public final class DeviceLocationManager: NSObject  {
+public final class DeviceLocationManager: NSObject, ObservableObject  {
     public static let shared = DeviceLocationManager()
     
     let manager = CLLocationManager()
@@ -64,19 +64,19 @@ extension DeviceLocationManager:CLLocationManagerDelegate {
         locationContinuation?.resume(throwing: error)
     }
     
-    @available(*, deprecated, message: "Use async instead")
-    public func requestLocation() {
-        manager.requestLocation()
-    }
+//    @available(*, deprecated, message: "Use async instead")
+//    public func requestLocation() {
+//        manager.requestLocation()
+//    }
     
-    func requestLocation() async throws -> CLLocation? {
+    public func requestLocation() async throws -> CLLocation? {
         try await withCheckedThrowingContinuation { continuation in
             locationContinuation = continuation
             manager.requestLocation()
         }
     }
     
-    func retrieveLocality() async -> String? {
+    func retrieveLocality(deviceLocation:CLLocation?) async -> String? {
         if let loc = deviceLocation {
             do {
                 async let placemark = try LocationServices.placemarkForLocation(loc)
@@ -85,6 +85,7 @@ extension DeviceLocationManager:CLLocationManagerDelegate {
                 print("LM updateLocality: couldn't find locality")
             }
         }
+        return nil
     }
 }
 
