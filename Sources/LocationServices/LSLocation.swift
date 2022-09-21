@@ -14,6 +14,7 @@ public struct LSLocation:Locatable, Hashable, Identifiable {
     public let latitude:Double
     public let longitude:Double
     public let description:String
+    public let timeStamp:Date
     
     public var id:String {
         "\(latitude)+\(longitude)"
@@ -23,13 +24,18 @@ public struct LSLocation:Locatable, Hashable, Identifiable {
     public let initializingPlacemark:CLPlacemark?
     public let initializingMKMapItem:MKMapItem?
 
-    init(latitude: Double, longitude: Double, description: String) {
+    init(latitude: Double, longitude: Double, description: String, time:Date = Date.now) {
         self.latitude = latitude
         self.longitude = longitude
         self.description = description
+        self.timeStamp = time
         self.initializingCLLocation = nil
         self.initializingPlacemark = nil
         self.initializingMKMapItem = nil
+    }
+    
+    public var sendable:(latitude:Double, longitude:Double, description:String, timeStamp:Date) {
+        return (latitude, longitude, description, timeStamp)
     }
     
 }

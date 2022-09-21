@@ -52,6 +52,20 @@ public enum LocationServices {
         String([mkmapitem.name, mkmapitem.placemark.administrativeArea, mkmapitem.placemark.country].compactMap({$0}).joined(separator: ", "))
     }
     
+    static func descriptionFromCLLocation(for newCLLocation:CLLocation) async -> String {
+            do {
+                let placemark = try await LocationServices.placemarkForLocation(newCLLocation)
+                let nameString = LocationServices.descriptionFromPlacemark(placemark)
+                
+                return nameString
+                
+            } catch {
+                print("LM updateDescription: couldn't find locality")
+                return newCLLocation.dmsString
+            }
+        
+    }
+    
     static func locationsForPlacemarks(_ placemarks:[CLPlacemark]) -> [LSLocation]{
         var tmp:[LSLocation?] = []
         for item in placemarks {

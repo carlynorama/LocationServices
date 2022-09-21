@@ -22,6 +22,7 @@ public extension LSLocation {
         if let location = placemark.location {
             self.latitude = location.coordinate.latitude
             self.longitude = location.coordinate.longitude
+            self.timeStamp = Date.now
             
             self.initializingPlacemark = placemark
             self.description = LocationServices.descriptionFromPlacemark(placemark)
@@ -38,6 +39,18 @@ public extension LSLocation {
         self.latitude = cllocation.latitude
         self.longitude = cllocation.longitude
         self.description = name
+        self.timeStamp = Date.now
+        
+        self.initializingCLLocation = cllocation
+        self.initializingPlacemark = nil
+        self.initializingMKMapItem = nil
+    }
+    
+    init(cllocation:CLLocation) async {
+        self.latitude = cllocation.latitude
+        self.longitude = cllocation.longitude
+        self.description = await LocationServices.descriptionFromCLLocation(for: cllocation)
+        self.timeStamp = Date.now
         
         self.initializingCLLocation = cllocation
         self.initializingPlacemark = nil
@@ -49,6 +62,7 @@ public extension LSLocation {
         self.latitude = mkmapitem.placemark.coordinate.latitude
         self.longitude = mkmapitem.placemark.coordinate.longitude
         self.description = LocationServices.descriptionFromMapItem(mkmapitem)
+        self.timeStamp = Date.now
         
         self.initializingMKMapItem = mkmapitem
         self.initializingCLLocation = nil

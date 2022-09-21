@@ -9,100 +9,51 @@ import Foundation
 import CoreLocation
 
 
-class LocationProvider {
+public final class LocationProvider {
+    let locationStore:LocationStore
+    let deviceLocation:DeviceLocationManager
     
-//    @Published public var deviceLocation:CLLocation?
-//    @Published public var deviceLocality:String?
+    @Published public var locationToUse:LSLocation
     
-    public var defaultLocation:CLLocation = CLLocation(latitude: 34.0536909,
-                                                       longitude: -118.242766)
+    init(locationStore:LocationStore, deviceLocationManager:DeviceLocationManager) {
+        self.locationStore = locationStore
+        self.deviceLocation = deviceLocationManager
+        self.locationToUse = locationStore.storedCurrentLocation() ?? LocationStore.defaultLSLocation
+    }
     
-    //TODO:Check user defaults for a saved defaultLocation, add to init? static builder?
-    @Published public var locationToUse:CLLocation = CLLocation(latitude: 34.0536909,
-                                                                longitude: -118.242766)
-    @Published public var locationName:String = "Default Location"
-    
-    @Published public var lslocationToUse:LSLocation = LSLocation(cllocation: CLLocation(latitude: 34.0536909,longitude: -118.242766), name: "Start Location")
-    
-    //    static func determineLocationToUse(_ location:CLLocation? = nil) -> CLLocation {
-    //        if let loc = location {
-    //            return loc
-    //        } else {
-    //            //TODO: Look in user defaults.
-    //            return CLLocation(latitude: 34.0536909,
-    //                                      longitude: -118.242766)
-    //        }
-    //    }
-    
-    public var locationPublisher:Published<CLLocation>.Publisher {
+    public var locationPublisher:Published<LSLocation>.Publisher {
         $locationToUse
     }
-    public var locationPublished:Published<CLLocation> {
+    public var locationPublished:Published<LSLocation> {
         _locationToUse
     }
-    
-    public var lslocationPublisher:Published<LSLocation>.Publisher {
-        $lslocationToUse
-    }
-    public var lslocationPublished:Published<LSLocation> {
-        _lslocationToUse
-    }
-    
-//    var locationHistory:[LSLocation] = [LSLocation(coordinates: CLLocation(latitude: 34.0536909,
-//                                                                           longitude: -118.242766), name: "Start Location")]
-//
-}
 
-//MARK: Getting Descriptions
-extension LocationProvider {
-
-    
-    func updateDescription() {
-        Task {
-            do {
-                await MainActor.run {
-                    self.locationName = "..."
-                }
-                let placemark = try await LocationServices.placemarkForLocation(locationToUse)
-                let string = LocationServices.descriptionFromPlacemark(placemark)
-                
-                await MainActor.run {
-                    self.locationName =  string//?? "No place name available"
-                }
-                await MainActor.run {
-                    lslocationToUse = LSLocation(cllocation: locationToUse, name: locationName)
-                }
-                
-            } catch {
-                print("LM updateDescription: couldn't find locality")
-            }
+    func requestDeviceLocation() async {
+        if let newLocation = try? await deviceLocation.requestLocation() {
+            async let newLSLocaiton = LSLocation(cllocation: newLocation)
+            updateLocation(await newLSLocaiton)
         }
     }
     
-    public func updateLocationToUse(lat:Double, long:Double) {
-        //TODO: save to user defaults
+    public func updateLocation(lat:Double, long:Double) async {
         let newLocation = CLLocation(latitude: lat, longitude: long)
-        
-        self.defaultLocation = newLocation
-        self.locationToUse = newLocation
-        updateDescription()
+        let newLSLocation = LSLocation(cllocation: newLocation, name: await LocationServices.descriptionFromCLLocation(for: newLocation))
+        updateLocation(newLSLocation)
     }
     
-    public func updateLocationToUse(_ location:LSLocation) {
-        self.locationToUse = location.location
-        self.locationName = location.description
+    public func updateLocation(lat:Double, long:Double, name:String) {
+        let newLSLocation = LSLocation(cllocation: CLLocation(latitude: lat, longitude: long), name: name)
+        updateLocation(newLSLocation)
     }
     
+    public func updateLocation(cllocation: CLLocation, name: String) {
+        let newLSLocation = LSLocation(cllocation: cllocation, name: name)
+        updateLocation(newLSLocation)
+    }
     
-//    func updateStoredLocations(_ location:) async {
-//        updateLocality()
-//        if let loc = deviceLocation {
-//            locationToUse = loc
-//        } else {
-//            locationToUse = defaultLocation
-//        }
-//        updateDescription()
-//    }
+    public func updateLocation(_ location:LSLocation)  {
+        self.locationToUse = location
+    }
     
 }
 

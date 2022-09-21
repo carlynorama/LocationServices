@@ -23,14 +23,14 @@ public protocol LocationHandler {
     
 }
 
-public protocol CLLocationPublisher:LocationHandler {
-    var locationPublisher:Published<CLLocation>.Publisher { get }
-    var locationPublished:Published<CLLocation> { get }
-}
+//public protocol CLLocationPublisher:LocationHandler {
+//    var locationPublisher:Published<CLLocation>.Publisher { get }
+//    var locationPublished:Published<CLLocation> { get }
+//}
 
 public protocol LSLocationPublisher:LocationHandler {
-    var lslocationPublisher:Published<LSLocation>.Publisher { get }
-    var lslocationPublished:Published<LSLocation> { get }
+    var locationPublisher:Published<LSLocation>.Publisher { get }
+    var locationPublished:Published<LSLocation> { get }
 }
 
 public protocol LocationNotifier:LocationHandler {

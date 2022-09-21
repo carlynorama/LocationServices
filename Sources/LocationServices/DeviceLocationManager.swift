@@ -11,36 +11,35 @@ import MapKit
 
 
 
-public final class DeviceLocationManager: NSObject, ObservableObject  {
-    public static let shared = DeviceLocationManager()
-    
-    let manager = CLLocationManager()
+public final class DeviceLocationManager: NSObject, CLLocationManagerDelegate, ObservableObject  {
     var locationContinuation: CheckedContinuation<CLLocation?, Error>?
-    
+    let manager = CLLocationManager()
+
     public override init() {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyReduced
         manager.requestWhenInUseAuthorization()
     }
-    
-    
-}
 
-extension DeviceLocationManager:CLLocationManagerDelegate {
-   
-    
-    public var isEnabled:Bool? {
-        switch manager.authorizationStatus {
-        case .restricted, .denied:
-            return false
-        case .authorizedWhenInUse, .authorizedAlways:
-            return true
-        case .notDetermined: // The user hasn’t chosen an authorization status
-            return nil
-        @unknown default:
-            fatalError()
+    public func requestLocation() async throws -> CLLocation? {
+        try await withCheckedThrowingContinuation { continuation in
+            locationContinuation = continuation
+            manager.requestLocation()
         }
+    }
+
+
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+            locationContinuation?.resume(returning: locations.first)
+        
+    }
+
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        
+            locationContinuation?.resume(throwing: error)
+        
     }
     
     public func locationManager(_ manager:CLLocationManager,
@@ -56,36 +55,17 @@ extension DeviceLocationManager:CLLocationManagerDelegate {
         }
     }
     
-    public func locationManager(_ manager:CLLocationManager, didUpdateLocations locations:[CLLocation]) {
-        locationContinuation?.resume(returning: locations.first)
-    }
-    
-    public func locationManager(_ manager:CLLocationManager, didFailWithError error:Error) {
-        locationContinuation?.resume(throwing: error)
-    }
-    
-//    @available(*, deprecated, message: "Use async instead")
-//    public func requestLocation() {
-//        manager.requestLocation()
-//    }
-    
-    public func requestLocation() async throws -> CLLocation? {
-        try await withCheckedThrowingContinuation { continuation in
-            locationContinuation = continuation
-            manager.requestLocation()
+    public var isEnabled:Bool? {
+        switch manager.authorizationStatus {
+        case .restricted, .denied:
+            return false
+        case .authorizedWhenInUse, .authorizedAlways:
+            return true
+        case .notDetermined: // The user hasn’t chosen an authorization status
+            return nil
+        @unknown default:
+            fatalError()
         }
-    }
-    
-    func retrieveLocality(deviceLocation:CLLocation?) async -> String? {
-        if let loc = deviceLocation {
-            do {
-                async let placemark = try LocationServices.placemarkForLocation(loc)
-                return try await placemark.locality
-            } catch {
-                print("LM updateLocality: couldn't find locality")
-            }
-        }
-        return nil
     }
 }
 

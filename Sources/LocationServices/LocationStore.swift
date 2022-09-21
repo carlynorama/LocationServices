@@ -11,10 +11,53 @@
 // Gruissan, France
 
 import Foundation
+import CoreLocation
 
 
 
-public struct LocationStore {
+public final class LocationStore {
+    
+    
+    var sessionLocationHistory:[LSLocation] = []
+    
+    let defaults = UserDefaults.standard
+    let currentLocationKey = "currentLocationKey"
+    let storedLocationsKey = "storedLocations"
+    
+    func currentLocationSave(_ location:LSLocation) {
+        defaults.set(location, forKey: currentLocationKey)
+    }
+    
+    func mostRecentLocationsSave(_ locations:[LSLocation]) {
+        let toStore = locations.sorted(by: { $0.timeStamp > $1.timeStamp }).prefix(5)
+        defaults.set(toStore, forKey: "recentLocations")
+    }
+    
+    func storedCurrentLocation() -> LSLocation? {
+        defaults.object(forKey: currentLocationKey) as? LSLocation
+    }
+    
+    func storedRecentLocations() -> [LSLocation]? {
+        defaults.object(forKey: storedLocationsKey) as? [LSLocation]
+    }
+    
+}
+
+extension LocationStore {
+    static var shared = LocationStore()
+    
+    public static let defaultLSLocation =
+        LSLocation(
+            latitude: 34.0536909,
+            longitude: -118.242766,
+            description: "Los Angeles, CA, United States")
+    
+    public static let defaultCLLocation:CLLocation =
+        CLLocation(
+            latitude: 34.0536909,
+            longitude: -118.242766)
+    
+    
     public static let locations = [
         LSLocation(
             latitude: 34.0536909,
