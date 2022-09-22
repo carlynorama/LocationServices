@@ -32,7 +32,7 @@ public final class LocationStore {
 //        defaults.removeObject(forKey: storedLocationsKey)
 //    }
     
-    private(set) var sessionLocationHistory:[LSLocation] = []
+    private(set) var sessionLocationHistory:Set<LSLocation> = []
     
     let defaults = UserDefaults.standard
     let currentLocationKey = "currentLocationKey"
@@ -76,15 +76,29 @@ public final class LocationStore {
     }
     
     func appendLocationToHistory(_ loc:LSLocation) {
-        sessionLocationHistory.append(loc)
-        storeRecentLocations(sessionLocationHistory)
+        sessionLocationHistory.insert(loc)
+        storeRecentLocations(Array(sessionLocationHistory))
     }
     
     func loadHistory() {
         if let stored = storedRecentLocations() {
             print("retrieved")
-            sessionLocationHistory = stored
+            sessionLocationHistory = Set(stored)
         }
+    }
+    
+    func clearSavedHistory() {
+        defaults.removeObject(forKey: storedLocationsKey)
+    }
+    
+    func clearSavedCurrent() {
+        defaults.removeObject(forKey: currentLocationKey)
+    }
+    
+    func clearStorage() {
+        clearSavedCurrent()
+        clearSavedHistory()
+        sessionLocationHistory = []
     }
     
 //    enum LocationStoreErrors:Error {

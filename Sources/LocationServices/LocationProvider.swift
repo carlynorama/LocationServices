@@ -78,7 +78,7 @@ public final class LocationProvider:ObservableObject {
         print("Location updated.")
     }
     
-    @Published public private(set) var recentLocations:[LSLocation] = []
+    @Published public private(set) var recentLocations:Set<LSLocation> = []
     
     func loadHistory() {
         print("loading history")
@@ -88,9 +88,14 @@ public final class LocationProvider:ObservableObject {
     
     func updateStorage(_ loc:LSLocation) {
         print("updating storage")
-        recentLocations.append(loc)
+        recentLocations.insert(loc)
         locationStore.currentLocationSave(loc)
         locationStore.appendLocationToHistory(loc)
+    }
+    
+    public func clearHistory() {
+        locationStore.clearSavedHistory()
+        recentLocations = []
     }
     
 
