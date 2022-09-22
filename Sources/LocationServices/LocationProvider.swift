@@ -9,13 +9,13 @@ import Foundation
 import CoreLocation
 
 
-public final class LocationProvider {
+public final class LocationProvider:ObservableObject {
     let locationStore:LocationStore
     let deviceLocation:DeviceLocationManager
     
     @Published public var locationToUse:LSLocation
     
-    init(locationStore:LocationStore, deviceLocationManager:DeviceLocationManager) {
+    public init(locationStore:LocationStore, deviceLocationManager:DeviceLocationManager) {
         self.locationStore = locationStore
         self.deviceLocation = deviceLocationManager
         self.locationToUse = locationStore.storedCurrentLocation() ?? LocationStore.defaultLSLocation
@@ -28,7 +28,7 @@ public final class LocationProvider {
         _locationToUse
     }
 
-    func requestDeviceLocation() async {
+    public func requestDeviceLocation() async {
         if let newLocation = try? await deviceLocation.requestLocation() {
             async let newLSLocaiton = LSLocation(cllocation: newLocation)
             updateLocation(await newLSLocaiton)
@@ -53,6 +53,8 @@ public final class LocationProvider {
     
     public func updateLocation(_ location:LSLocation)  {
         self.locationToUse = location
+        locationStore.currentLocationSave(location)
+        locationStore.sessionLocationHistory.append(location)
     }
     
 }

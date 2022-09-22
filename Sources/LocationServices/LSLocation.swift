@@ -61,6 +61,23 @@ public extension LSLocation {
     
 }
 
+extension LSLocation:Codable {
+    enum CodingKeys: String, CodingKey {
+        case latitude
+        case longitude
+        case description
+        case timeStamp
+    }
+    
+    public init(from decoder: Decoder) throws {
+            let values = try decoder.container(keyedBy: CodingKeys.self)
+            latitude = try values.decode(Double.self, forKey: .latitude)
+            longitude = try values.decode(Double.self, forKey: .longitude)
+        description = try values.decode(String.Type, forKey: .description)
+    
+    
+}
+
 
 public extension LSLocation {
     static func locationsForPlacemarks(_ placemarks:[CLPlacemark]) -> [LSLocation]{

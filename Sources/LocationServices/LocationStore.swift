@@ -17,6 +17,7 @@ import CoreLocation
 
 public final class LocationStore {
     
+    public init() {}
     
     var sessionLocationHistory:[LSLocation] = []
     
