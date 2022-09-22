@@ -16,10 +16,23 @@ import CoreLocation
 
 
 public final class LocationStore {
+    public init() {
+        
+    }
     
-    public init() {}
     
-    var sessionLocationHistory:[LSLocation] = []
+//    private(set) var saveHistory:Bool = false
+//
+//    func turnOnHistory() {
+//        saveHistory = true
+//    }
+//
+//    func turnOffHistory() {
+//        saveHistory = false
+//        defaults.removeObject(forKey: storedLocationsKey)
+//    }
+    
+    private(set) var sessionLocationHistory:[LSLocation] = []
     
     let defaults = UserDefaults.standard
     let currentLocationKey = "currentLocationKey"
@@ -33,10 +46,11 @@ public final class LocationStore {
         }
     }
     
-    func mostRecentLocationsSave(_ locations:[LSLocation]) {
+    private func storeRecentLocations(_ locations:[LSLocation]) {
         let toStore = Array(locations.sorted(by: { $0.timeStamp > $1.timeStamp }).prefix(5))
         do {
-            try defaults.setCustom(toStore, forKey: "recentLocations")
+            print("storing: \(toStore)")
+            try defaults.setCustom(toStore, forKey: storedLocationsKey)
         } catch {
             print(error)
         }
@@ -51,7 +65,8 @@ public final class LocationStore {
         }
     }
     
-    func storedRecentLocations() -> [LSLocation]? {
+    private func storedRecentLocations() -> [LSLocation]? {
+        print("retrieving")
         do {
             return try defaults.getCustom(forKey: storedLocationsKey, as: [LSLocation].self)
         } catch {
@@ -59,6 +74,22 @@ public final class LocationStore {
             return nil
         }
     }
+    
+    func appendLocationToHistory(_ loc:LSLocation) {
+        sessionLocationHistory.append(loc)
+        storeRecentLocations(sessionLocationHistory)
+    }
+    
+    func loadHistory() {
+        if let stored = storedRecentLocations() {
+            print("retrieved")
+            sessionLocationHistory = stored
+        }
+    }
+    
+//    enum LocationStoreErrors:Error {
+//        case historyOff
+//    }
     
 }
 

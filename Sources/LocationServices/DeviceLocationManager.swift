@@ -14,31 +14,33 @@ import MapKit
 public final class DeviceLocationManager: NSObject, CLLocationManagerDelegate, ObservableObject  {
     var locationContinuation: CheckedContinuation<CLLocation?, Error>?
     let manager = CLLocationManager()
-
+    
     public override init() {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyReduced
         manager.requestWhenInUseAuthorization()
     }
-
+    
     public func requestLocation() async throws -> CLLocation? {
-        try await withCheckedThrowingContinuation { continuation in
+        status = .requesting
+        return try await withCheckedThrowingContinuation { continuation in
             locationContinuation = continuation
             manager.requestLocation()
         }
     }
-
-
+    
+    
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        
-            locationContinuation?.resume(returning: locations.first)
+        status = .success
+        locationContinuation?.resume(returning: locations.first)
         
     }
-
+    
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        
-            locationContinuation?.resume(throwing: error)
+        status = .failed
+        print(error.localizedDescription)
+        locationContinuation?.resume(throwing: error)
         
     }
     
@@ -67,6 +69,15 @@ public final class DeviceLocationManager: NSObject, CLLocationManagerDelegate, O
             fatalError()
         }
     }
+    
+    public enum RequestStatus {
+        case requesting
+        case success
+        case norequestyet
+        case failed
+    }
+    
+    public var status:RequestStatus = .norequestyet
 }
 
 

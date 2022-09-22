@@ -25,6 +25,7 @@ extension UserDefaults {
             let data = try encoder.encode(objects)
             set(data, forKey: key)
         }catch {
+            print("could not encode")
             throw DefaultSavingError.unableToEncode
         }
     }
@@ -38,6 +39,7 @@ extension UserDefaults {
             let object = try decoder.decode(type, from: data)
             return object
         } catch {
+            print("could not decode")
             throw DefaultSavingError.unableToDecode
         }
     }

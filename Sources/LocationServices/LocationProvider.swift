@@ -9,6 +9,7 @@ import Foundation
 import CoreLocation
 
 
+@MainActor
 public final class LocationProvider:ObservableObject {
     let locationStore:LocationStore
     let deviceLocation:DeviceLocationManager
@@ -19,6 +20,7 @@ public final class LocationProvider:ObservableObject {
         self.locationStore = locationStore
         self.deviceLocation = deviceLocationManager
         self.locationToUse = locationStore.storedCurrentLocation() ?? LocationStore.defaultLSLocation
+        loadHistory()
     }
     
     public var locationPublisher:Published<LSLocation>.Publisher {
@@ -29,9 +31,27 @@ public final class LocationProvider:ObservableObject {
     }
 
     public func requestDeviceLocation() async {
+        print("request triggered")
+        status = .pending
+        guard deviceLocation.status != .requesting else {
+            print("request already in progress.")
+            return
+        }
+        print("new device location request.")
         if let newLocation = try? await deviceLocation.requestLocation() {
-            async let newLSLocaiton = LSLocation(cllocation: newLocation)
-            updateLocation(await newLSLocaiton)
+            print("Location recieved, finding description.")
+            let newLSLocaiton = await LSLocation(cllocation: newLocation)
+            
+            if newLSLocaiton == locationToUse {
+            //if newLSLocaiton.compareCoordinates(locationToUse) {
+                print("still in the same spot")
+                status = .success
+            } else {
+                updateLocation(newLSLocaiton)
+            }
+        } else {
+            print("Device location not returned.")
+            status = .failed
         }
     }
     
@@ -52,10 +72,38 @@ public final class LocationProvider:ObservableObject {
     }
     
     public func updateLocation(_ location:LSLocation)  {
-        self.locationToUse = location
-        locationStore.currentLocationSave(location)
-        locationStore.sessionLocationHistory.append(location)
+       self.locationToUse = location
+        updateStorage(location)
+        status = .success
+        print("Location updated.")
     }
+    
+    @Published public private(set) var recentLocations:[LSLocation] = []
+    
+    func loadHistory() {
+        print("loading history")
+        locationStore.loadHistory()
+        recentLocations = locationStore.sessionLocationHistory
+    }
+    
+    func updateStorage(_ loc:LSLocation) {
+        print("updating storage")
+        recentLocations.append(loc)
+        locationStore.currentLocationSave(loc)
+        locationStore.appendLocationToHistory(loc)
+    }
+    
+
+    
+    
+    public enum RequestStatus {
+        case pending
+        case success
+        case norequestyet
+        case failed
+    }
+    
+    public var status:RequestStatus = .norequestyet
     
 }
 

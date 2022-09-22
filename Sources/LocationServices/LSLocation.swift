@@ -17,7 +17,7 @@ public struct LSLocation:Locatable, Hashable, Identifiable, Codable, Sendable {
     public let timeStamp:Date
     
     public var id:String {
-        "\(latitude)+\(longitude)"
+        "\(latitude)+\(longitude)+\(timeStamp)"
     }
   
       //TODO: Save _the fields_
@@ -37,10 +37,21 @@ public struct LSLocation:Locatable, Hashable, Identifiable, Codable, Sendable {
 //        self.initializingMKMapItem = nil
     }
     
-    public var sendable:(latitude:Double, longitude:Double, description:String, timeStamp:Date) {
-        return (latitude, longitude, description, timeStamp)
+    public func compare(_ rhs:LSLocation) -> (cordinatesEqual:Bool, contentEqual:Bool, timeStampDif:TimeInterval) {
+        return (compareCoordinates(rhs), compareContent(rhs), compareTimeStamps(rhs))
     }
     
+    func compareCoordinates(_ rhs:LSLocation) -> Bool {
+        self.latitude == rhs.latitude && self.longitude == rhs.longitude
+    }
+    
+    func compareContent(_ rhs:LSLocation) -> Bool {
+        self.description == rhs.description
+    }
+    
+    func compareTimeStamps(_ rhs:LSLocation) -> TimeInterval {
+        self.timeStamp.timeIntervalSinceReferenceDate - rhs.timeStamp.timeIntervalSinceReferenceDate
+    }
 }
 
 
