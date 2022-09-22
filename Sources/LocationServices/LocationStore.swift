@@ -26,20 +26,38 @@ public final class LocationStore {
     let storedLocationsKey = "storedLocations"
     
     func currentLocationSave(_ location:LSLocation) {
-        defaults.set(location, forKey: currentLocationKey)
+        do {
+            try defaults.setCustom(location, forKey: currentLocationKey)
+        } catch {
+            print(error)
+        }
     }
     
     func mostRecentLocationsSave(_ locations:[LSLocation]) {
-        let toStore = locations.sorted(by: { $0.timeStamp > $1.timeStamp }).prefix(5)
-        defaults.set(toStore, forKey: "recentLocations")
+        let toStore = Array(locations.sorted(by: { $0.timeStamp > $1.timeStamp }).prefix(5))
+        do {
+            try defaults.setCustom(toStore, forKey: "recentLocations")
+        } catch {
+            print(error)
+        }
     }
     
     func storedCurrentLocation() -> LSLocation? {
-        defaults.object(forKey: currentLocationKey) as? LSLocation
+        do {
+            return try defaults.getCustom(forKey: currentLocationKey, as: LSLocation.self)
+        } catch {
+            print(error)
+            return nil
+        }
     }
     
     func storedRecentLocations() -> [LSLocation]? {
-        defaults.object(forKey: storedLocationsKey) as? [LSLocation]
+        do {
+            return try defaults.getCustom(forKey: storedLocationsKey, as: [LSLocation].self)
+        } catch {
+            print(error)
+            return nil
+        }
     }
     
 }
