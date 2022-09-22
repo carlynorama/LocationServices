@@ -24,10 +24,10 @@ public extension LSLocation {
             self.longitude = location.coordinate.longitude
             self.timeStamp = Date.now
             
-            self.initializingPlacemark = placemark
+//            self.initializingPlacemark = placemark
             self.description = LocationServices.descriptionFromPlacemark(placemark)
-            self.initializingMKMapItem = nil
-            self.initializingCLLocation = nil
+//            self.initializingMKMapItem = nil
+//            self.initializingCLLocation = nil
             
         } else {
             return nil
@@ -41,9 +41,9 @@ public extension LSLocation {
         self.description = name
         self.timeStamp = Date.now
         
-        self.initializingCLLocation = cllocation
-        self.initializingPlacemark = nil
-        self.initializingMKMapItem = nil
+//        self.initializingCLLocation = cllocation
+//        self.initializingPlacemark = nil
+//        self.initializingMKMapItem = nil
     }
     
     init(cllocation:CLLocation) async {
@@ -52,9 +52,9 @@ public extension LSLocation {
         self.description = await LocationServices.descriptionFromCLLocation(for: cllocation)
         self.timeStamp = Date.now
         
-        self.initializingCLLocation = cllocation
-        self.initializingPlacemark = nil
-        self.initializingMKMapItem = nil
+//        self.initializingCLLocation = cllocation
+//        self.initializingPlacemark = nil
+//        self.initializingMKMapItem = nil
     }
     
     //relies of locatable extension
@@ -64,8 +64,31 @@ public extension LSLocation {
         self.description = LocationServices.descriptionFromMapItem(mkmapitem)
         self.timeStamp = Date.now
         
-        self.initializingMKMapItem = mkmapitem
-        self.initializingCLLocation = nil
-        self.initializingPlacemark = nil
+//        self.initializingMKMapItem = mkmapitem
+//        self.initializingCLLocation = nil
+//        self.initializingPlacemark = nil
     }
 }
+
+//
+//public extension LSLocation {
+//    var cllocation:CLLocation {
+//        if let initializingCLLocation {
+//            return initializingCLLocation
+//        } else {
+//            return CLLocation(latitude: latitude, longitude: longitude)
+//        }
+//    }
+//
+//    var placemark:CLPlacemark {
+//        get async throws {
+//            if let initializingPlacemark {
+//                return initializingPlacemark
+//            } else {
+//                return try await lookUpPlacemark()
+//            }
+//        }
+//    }
+//
+//}
+

@@ -10,7 +10,7 @@ import CoreLocation
 import MapKit
 
 
-public struct LSLocation:Locatable, Hashable, Identifiable {
+public struct LSLocation:Locatable, Hashable, Identifiable, Codable, Sendable {
     public let latitude:Double
     public let longitude:Double
     public let description:String
@@ -19,62 +19,27 @@ public struct LSLocation:Locatable, Hashable, Identifiable {
     public var id:String {
         "\(latitude)+\(longitude)"
     }
-    
-    public let initializingCLLocation:CLLocation?
-    public let initializingPlacemark:CLPlacemark?
-    public let initializingMKMapItem:MKMapItem?
+  
+      //TODO: Save _the fields_
+    //It's moe important the it be Codeable and Sendable at this time
+    //than retain all possible data.
+//    public let initializingCLLocation:CLLocation?
+//    public let initializingPlacemark:CLPlacemark?
+//    public let initializingMKMapItem:MKMapItem?
 
     init(latitude: Double, longitude: Double, description: String, time:Date = Date.now) {
         self.latitude = latitude
         self.longitude = longitude
         self.description = description
         self.timeStamp = time
-        self.initializingCLLocation = nil
-        self.initializingPlacemark = nil
-        self.initializingMKMapItem = nil
+//        self.initializingCLLocation = nil
+//        self.initializingPlacemark = nil
+//        self.initializingMKMapItem = nil
     }
     
     public var sendable:(latitude:Double, longitude:Double, description:String, timeStamp:Date) {
         return (latitude, longitude, description, timeStamp)
     }
-    
-}
-
-public extension LSLocation {
-    var cllocation:CLLocation {
-        if let initializingCLLocation {
-            return initializingCLLocation
-        } else {
-            return CLLocation(latitude: latitude, longitude: longitude)
-        }
-    }
-    
-    var placemark:CLPlacemark {
-        get async throws {
-            if let initializingPlacemark {
-                return initializingPlacemark
-            } else {
-                return try await lookUpPlacemark()
-            }
-        }
-    }
-    
-}
-
-extension LSLocation:Codable {
-    enum CodingKeys: String, CodingKey {
-        case latitude
-        case longitude
-        case description
-        case timeStamp
-    }
-    
-    public init(from decoder: Decoder) throws {
-            let values = try decoder.container(keyedBy: CodingKeys.self)
-            latitude = try values.decode(Double.self, forKey: .latitude)
-            longitude = try values.decode(Double.self, forKey: .longitude)
-        description = try values.decode(String.Type, forKey: .description)
-    
     
 }
 
