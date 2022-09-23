@@ -10,15 +10,16 @@ import CoreLocation
 
 
 @MainActor
-public final class LocationProvider:ObservableObject {
+public final class LocationService:ObservableObject {
     let locationStore:LocationStore
-    let deviceLocation:DeviceLocationManager
+    let deviceLocationManager:DeviceLocationManager
     
     @Published public var locationToUse:LSLocation
+    @Published public private(set) var recentLocations:Set<LSLocation> = []
     
     public init(locationStore:LocationStore, deviceLocationManager:DeviceLocationManager) {
         self.locationStore = locationStore
-        self.deviceLocation = deviceLocationManager
+        self.deviceLocationManager = deviceLocationManager
         self.locationToUse = locationStore.storedCurrentLocation() ?? LocationStore.defaultLSLocation
         loadHistory()
     }
@@ -33,12 +34,12 @@ public final class LocationProvider:ObservableObject {
     public func requestDeviceLocation() async {
         print("request triggered")
         status = .pending
-        guard deviceLocation.status != .requesting else {
+        guard deviceLocationManager.status != .requesting else {
             print("request already in progress.")
             return
         }
         print("new device location request.")
-        if let newLocation = try? await deviceLocation.requestLocation() {
+        if let newLocation = try? await deviceLocationManager.requestLocation() {
             print("Location recieved, finding description.")
             let newLSLocaiton = await LSLocation(cllocation: newLocation)
             
@@ -78,7 +79,7 @@ public final class LocationProvider:ObservableObject {
         print("Location updated.")
     }
     
-    @Published public private(set) var recentLocations:Set<LSLocation> = []
+    
     
     func loadHistory() {
         print("loading history")

@@ -27,7 +27,7 @@ public struct LSLocation:Locatable, Hashable, Identifiable, Codable, Sendable {
 //    public let initializingPlacemark:CLPlacemark?
 //    public let initializingMKMapItem:MKMapItem?
 
-    init(latitude: Double, longitude: Double, description: String, time:Date = Date.now) {
+    public init(latitude: Double, longitude: Double, description: String, time:Date = Date.now) {
         self.latitude = latitude
         self.longitude = longitude
         self.description = description

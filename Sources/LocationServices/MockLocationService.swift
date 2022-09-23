@@ -16,30 +16,30 @@ extension MKMapItem {
 }
 
 
-public class LoremIpsunLocationSetAmmet:LocationHandler {
+public class LoremIpsunLocationSetAmmet:LocationProvider {
     
     
-    public var locationName: String = "Los Angeles"
-    public var deviceLocality: String? = "Los Angeles"
+//    public var locationName: String = "Los Angeles"
+//    public var deviceLocality: String? = "Los Angeles"
+//
+    public var defaultLocation = LocationStore.locations[0]
+//                                            
+//    @Published public var locationToUse:CLLocation = CLLocation(latitude: 34.0536909,
+//                                                                longitude: -118.242766)
+//
+    @Published public var locationToUse = LocationStore.locations[0]
     
-    public var defaultLocation = CLLocation(latitude: 34.0536909,
-                                            longitude: -118.242766)
-    @Published public var locationToUse:CLLocation = CLLocation(latitude: 34.0536909,
-                                                                longitude: -118.242766)
-    
-    @Published public var lslocationToUse = LocationStore.locations[0]
-    
-    public var locationPublisher:Published<CLLocation>.Publisher {
+    public var locationPublisher:Published<LSLocation>.Publisher {
         $locationToUse
     }
-    public var locationPublished:Published<CLLocation> {
+    public var locationPublished:Published<LSLocation> {
         _locationToUse
     }
     public var deviceLocation:CLLocation? = nil
     
     public func updateLocationToUse(lat:Double, long:Double) {
         if let newLocation = Self.locations.first(where: { $0.latitude == lat }) {
-            locationToUse = newLocation.location
+            locationToUse = newLocation
         } else {
             locationToUse = defaultLocation
         }

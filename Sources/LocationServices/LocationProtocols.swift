@@ -11,42 +11,39 @@ import MapKit
 
 
 
-public protocol LocationHandler {
-    var defaultLocation:CLLocation { get set }
-    
-    var locationToUse:CLLocation { get }
-    var locationName:String { get }
-    var lslocationToUse:LSLocation { get }
-    
-    var deviceLocation:CLLocation? { get }
-    var deviceLocality:String? { get }
-    
+public protocol LocationProvider {
+    var locationToUse:LSLocation { get }
 }
 
-//public protocol CLLocationPublisher:LocationHandler {
-//    var locationPublisher:Published<CLLocation>.Publisher { get }
-//    var locationPublished:Published<CLLocation> { get }
-//}
+public protocol LocationHistoryProvider {
+    var recentLocations:Set<LSLocation> { get }
+}
 
-public protocol LSLocationPublisher:LocationHandler {
+
+public protocol LocationPublisher:LocationProvider {
     var locationPublisher:Published<LSLocation>.Publisher { get }
     var locationPublished:Published<LSLocation> { get }
 }
 
-public protocol LocationNotifier:LocationHandler {
+public protocol LocationHistoryPublisher:LocationProvider, LocationHistoryProvider {
+    var locationHistoryPublisher:Published<[LSLocation]>.Publisher { get }
+    var locationHistoryPublished:Published<[LSLocation]> { get }
+}
+
+public protocol LocationNotifier:LocationProvider {
     var notificationCenter:NotificationCenter { get }
     var notificationName:Notification.Name { get }
 }
 
 
-public extension LocationHandler {
+public extension LocationProvider {
     
-    var latitude:Double { locationToUse.coordinate.latitude }
-    var longitude:Double { locationToUse.coordinate.longitude }
+    var latitude:Double { locationToUse.latitude }
+    var longitude:Double { locationToUse.longitude }
     
 }
 
-extension LocationHandler {
+extension LocationProvider {
     
     func placemarkForLocation(_ location:CLLocation) async throws -> CLPlacemark {
         try await LocationServices.placemarkForLocation(location)
