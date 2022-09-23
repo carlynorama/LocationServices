@@ -14,14 +14,14 @@ public final class LocationService:ObservableObject {
     let locationStore:LocationStore
     let deviceLocationManager:DeviceLocationManager
     
-    @Published public var locationToUse:LSLocation
+    @Published public var locationToUse:LSLocation = LocationStore.defaultLSLocation
     @Published public private(set) var recentLocations:Set<LSLocation> = []
     
-    public init(locationStore:LocationStore, deviceLocationManager:DeviceLocationManager) {
+    nonisolated public init(locationStore:LocationStore, deviceLocationManager:DeviceLocationManager) {
         self.locationStore = locationStore
         self.deviceLocationManager = deviceLocationManager
-        self.locationToUse = locationStore.storedCurrentLocation() ?? LocationStore.defaultLSLocation
-        loadHistory()
+        Task { await loadCurrentLocation() }
+        Task { await loadHistory() }
     }
     
     public var locationPublisher:Published<LSLocation>.Publisher {
@@ -79,7 +79,9 @@ public final class LocationService:ObservableObject {
         print("Location updated.")
     }
     
-    
+    func loadCurrentLocation() {
+        self.locationToUse = locationStore.storedCurrentLocation() ?? LocationStore.defaultLSLocation
+    }
     
     func loadHistory() {
         print("loading history")
