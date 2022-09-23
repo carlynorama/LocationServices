@@ -24,6 +24,13 @@ public final class LocationService:ObservableObject {
         Task { await loadHistory() }
     }
     
+    nonisolated public init() {
+        self.locationStore = LocationStore()
+        self.deviceLocationManager = DeviceLocationManager()
+        Task { await loadCurrentLocation() }
+        Task { await loadHistory() }
+    }
+    
     public var locationPublisher:Published<LSLocation>.Publisher {
         $locationToUse
     }
