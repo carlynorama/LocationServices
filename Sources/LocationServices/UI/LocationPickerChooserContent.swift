@@ -53,9 +53,13 @@ struct LocationPickerChooserContent:View {
             //List(1..<5) { _ in
             
             ReserveSpaceWithFirstView(count: numberOfItems) {
-                ResultsRow(item: MKMapItem.example, action: { _ in print("Placeholder")}).opacity(0)
+                VStack() {
+                    Text("The Long Place Name, CA, Independent Sov")
+                    Text("Line 1")
+                    Text("Line 1")  }
+                //ResultsRow(item: MKMapItem.example, action: { _ in print("Placeholder")}).opacity(0)
                 //searchContent
-                
+
                 List(searchService.resultItems, id:\.self) { item in
                     ResultsRow(item: item, action: { _ in fullUpdateAndClose(item: item) })
                 }.listStyle(.plain)

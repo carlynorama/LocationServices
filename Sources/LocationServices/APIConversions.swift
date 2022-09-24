@@ -13,7 +13,9 @@ import MapKit
 public extension Locatable {
     func asMapItem() -> MKMapItem {
         //This can fail badly.
-        MKMapItem(placemark: MKPlacemark(coordinate: self.location.coordinate))
+        let item = MKMapItem(placemark: MKPlacemark(coordinate: self.location.coordinate))
+        item.name = description
+        return item
     }
 }
 

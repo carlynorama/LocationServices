@@ -173,6 +173,26 @@ struct CurrentLocationButton2: View {
     }
 }
 
+struct CurrentLSLocationButton: View {
+    let locationRequester:()->CLLocation?
+    @Binding var item:LSLocation
+    
+    var body: some View {
+        LocationButton(.currentLocation) {
+            if let newLoction = LSLocation(from: MKMapItem.forCurrentLocation()) {
+                item = newLoction
+            } else {
+                print("Unable to either get item or turn it into an LSLocation")
+            }
+            
+        }.symbolVariant(.fill)
+            .labelStyle(.iconOnly)
+            .foregroundColor(Color.white)
+            .cornerRadius(20)
+        
+    }
+}
+
 
 
 struct CurrentLocationButton: View {

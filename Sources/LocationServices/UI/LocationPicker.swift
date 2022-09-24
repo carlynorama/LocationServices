@@ -47,6 +47,8 @@ extension View where Self == LocationPicker {
 }
 
 
+
+
 public struct LocationPicker: View {
     @StateObject var searchService:LocationSearchService = LocationSearchService()
     

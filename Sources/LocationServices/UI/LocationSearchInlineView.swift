@@ -230,9 +230,22 @@ struct ReserveSpaceWithFirstView:Layout {
     let widthComfort = 1.3
     
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let sizeLimiter = subviews[0].sizeThatFits(.unspecified)
+        
+        //TODO: There is a bug in this code. The space reserving view causes trouble if it is A)flexible B)Large. 
         let suggestedSize = proposal.replacingUnspecifiedDimensions()
-        let size = CGSize(width: max(sizeLimiter.width * widthComfort, suggestedSize.width).rounded(), height: max(sizeLimiter.height * CGFloat(count), suggestedSize.height))
+        let sizeLimiter = subviews[0].sizeThatFits(.unspecified)
+        //the sizeLimiter
+        let width = max(sizeLimiter.width * widthComfort, suggestedSize.width).rounded()
+        
+//        let width = suggestedSize.width.rounded()
+//        let width = sizeLimiter.width.rounded()
+        
+        let height = max(sizeLimiter.height * CGFloat(count), suggestedSize.height)
+    
+        
+        let size = CGSize(
+            width: width,
+            height: height)
         return size
     }
     
@@ -243,11 +256,12 @@ struct ReserveSpaceWithFirstView:Layout {
         }
         
         
-//        subviews[0].place(
-//            at: CGPoint(x: -1000, y: -1000),
-//            proposal: proposal
-//        )
         
+        print("bounds: \(bounds)")
+        subviews[0].place(
+            at: bounds.origin,
+            proposal: proposal
+        )
         subviews[1].place(
             at: bounds.origin,
             proposal: proposal
