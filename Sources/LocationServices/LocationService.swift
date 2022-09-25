@@ -37,29 +37,59 @@ public final class LocationService:ObservableObject {
     public var locationPublished:Published<LSLocation> {
         _locationToUse
     }
-
-    public func requestDeviceLocation() async {
+    
+    public func retrieveDeviceLocation() async throws -> LSLocation {
         print("request triggered")
         status = .pending
         guard deviceLocationManager.status != .requesting else {
             print("request already in progress.")
-            return
+            status = .updateFailed
+            throw LocationServiceError.locationRequestAlreadyInProgress
         }
+        
         print("new device location request.")
-        if let newLocation = try? await deviceLocationManager.requestLocation() {
-            print("Location recieved, finding description.")
-            let newLSLocaiton = await LSLocation(cllocation: newLocation)
+        do {
+            let newLocation = try await deviceLocationManager.requestLocation()
+            //need this to be STRUCTURED. No going further without the results
+            print("Location result recieved, finding description.")
             
-            if newLSLocaiton == locationToUse {
+            if let newLocation {
+                status = .locationRecieved
+                let newLSLocaiton = await LSLocation(cllocation: newLocation)
+                return newLSLocaiton
+            } else {
+                status = .updateFailed
+                throw LocationServiceError.noLocationFromDevice
+            }
+            
+        } catch {
+            status = .updateFailed
+            throw LocationServiceError.couldNotMakeLocationFromDeviceLocation
+        }
+    }
+
+    public func updateWithDeviceLocation() async throws {
+        let newLocation = try await retrieveDeviceLocation()
+            
+            if newLocation == locationToUse {
             //if newLSLocaiton.compareCoordinates(locationToUse) {
                 print("still in the same spot")
-                status = .success
+                status = .updateSuccess
             } else {
-                updateLocation(newLSLocaiton)
+                updateLocation(newLocation)
+                //since there isn't anything that can go wrong in
+                //update function currently this is okay here.
+                status = .updateSuccess
             }
-        } else {
-            print("Device location not returned.")
-            status = .failed
+    }
+    
+    public func startDeviceLocationUpdateAttempt() -> Task<(), Never> {
+        Task {
+            do {
+                try await updateWithDeviceLocation()
+            } catch {
+                print(error.localizedDescription)
+            }
         }
     }
     
@@ -82,7 +112,7 @@ public final class LocationService:ObservableObject {
     public func updateLocation(_ location:LSLocation)  {
        self.locationToUse = location
         updateStorage(location)
-        status = .success
+        
         print("Location updated.")
     }
     
@@ -111,18 +141,23 @@ public final class LocationService:ObservableObject {
 
     
     
-    public enum RequestStatus {
+    public enum DeviceLocationRequestStatus {
         case pending
-        case success
+        case updateSuccess
         case norequestyet
-        case failed
+        case updateFailed
+        case locationRecieved
     }
     
-    public var status:RequestStatus = .norequestyet
+    public var status:DeviceLocationRequestStatus = .norequestyet
     
 }
 
-
+enum LocationServiceError:Error {
+    case locationRequestAlreadyInProgress
+    case noLocationFromDevice
+    case couldNotMakeLocationFromDeviceLocation
+}
 
 
 
