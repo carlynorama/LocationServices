@@ -31,12 +31,33 @@ public final class LocationService:ObservableObject {
         Task { await loadHistory() }
     }
     
+    
     public var locationPublisher:Published<LSLocation>.Publisher {
         $locationToUse
     }
     public var locationPublished:Published<LSLocation> {
         _locationToUse
     }
+    
+    //This stream is behving oddly? updating constantly not just on change?
+    //Better to have the reiver establish the stream if necessary.
+//    public func locationStream() -> AsyncStream<LSLocation> {
+//        return AsyncStream.init(unfolding: unfolding, onCancel: onCancel)
+//
+//        //() async -> _?
+//        func unfolding() async -> LSLocation? {
+//            for await location in locationPublisher.values {
+//                //print("\(location)")
+//                return location
+//            }
+//            return nil
+//        }
+//
+//        //optional
+//        @Sendable func onCancel() -> Void {
+//            print("confirm locationStream got canceled")
+//        }
+//    }
     
     public func retrieveDeviceLocation() async throws -> LSLocation {
         print("request triggered")
@@ -67,20 +88,20 @@ public final class LocationService:ObservableObject {
             throw LocationServiceError.couldNotMakeLocationFromDeviceLocation
         }
     }
-
+    
     public func updateWithDeviceLocation() async throws {
         let newLocation = try await retrieveDeviceLocation()
-            
-            if newLocation == locationToUse {
+        
+        if newLocation == locationToUse {
             //if newLSLocaiton.compareCoordinates(locationToUse) {
-                print("still in the same spot")
-                status = .updateSuccess
-            } else {
-                updateLocation(newLocation)
-                //since there isn't anything that can go wrong in
-                //update function currently this is okay here.
-                status = .updateSuccess
-            }
+            print("still in the same spot")
+            status = .updateSuccess
+        } else {
+            updateLocation(newLocation)
+            //since there isn't anything that can go wrong in
+            //update function currently this is okay here.
+            status = .updateSuccess
+        }
     }
     
     public func startDeviceLocationUpdateAttempt() -> Task<(), Never> {
@@ -110,7 +131,7 @@ public final class LocationService:ObservableObject {
     }
     
     public func updateLocation(_ location:LSLocation)  {
-       self.locationToUse = location
+        self.locationToUse = location
         updateStorage(location)
         
         print("Location updated.")
@@ -138,7 +159,7 @@ public final class LocationService:ObservableObject {
         recentLocations = []
     }
     
-
+    
     
     
     public enum DeviceLocationRequestStatus {
